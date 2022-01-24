@@ -14,21 +14,12 @@ import org.springframework.core.annotation.AliasFor;
 @ParamAttribute(type = 3)
 public @interface FromHeader {
 
-	/**
-	 * 消息头名称
-	 */
 	@AliasFor(annotation = ParamAttribute.class)
 	String value() default "";
 
-	/**
-	 * 消息头名称
-	 */
 	@AliasFor(annotation = ParamAttribute.class)
 	String name() default "";
 	
-	/**
-	 * 是否检查参数
-	 */
 	@AliasFor(annotation = ParamAttribute.class)
 	boolean required() default true;
 }

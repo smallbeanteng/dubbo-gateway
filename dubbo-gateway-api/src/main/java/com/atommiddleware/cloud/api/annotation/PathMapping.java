@@ -13,21 +13,12 @@ import org.springframework.core.annotation.AliasFor;
 @Documented
 public @interface PathMapping {
 
-	/**
-	 * 路径表达式
-	 */
 	@AliasFor("path")
 	String value() default "";
 
-	/**
-	 * 路径表达式
-	 */
 	@AliasFor("value")
 	String path() default "";
 	
-	/**
-	 * 提交方法，GET或POST
-	 */
 	RequestMethod requestMethod() default RequestMethod.POST;
 	
 	public enum RequestMethod {

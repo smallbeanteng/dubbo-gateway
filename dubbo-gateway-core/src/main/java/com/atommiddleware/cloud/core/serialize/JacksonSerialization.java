@@ -1,5 +1,7 @@
 package com.atommiddleware.cloud.core.serialize;
 
+import java.io.InputStream;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -35,7 +37,7 @@ public class JacksonSerialization implements Serialization {
 		try {
 			json = mapper.writeValueAsString(serializeObject);
 		} catch (JsonProcessingException e) {
-			log.error("[{}] toJsonString error：{{}}", serializeObject.getClass().getSimpleName(), e);
+			log.error(" toJsonString error", e);
 		}
 		return json;
 	}
@@ -46,9 +48,33 @@ public class JacksonSerialization implements Serialization {
 		try {
 			t = mapper.readValue(input, clazz);
 		} catch (Exception e) {
-			log.error(" parse json [{}] to class [{}] error：{{}}", input, clazz.getSimpleName(), e);
+			log.error(" parse json to class [{}] ", clazz.getSimpleName());
 		}
 		return t;
+	}
+
+	@Override
+	public <T> T deserialize(InputStream input, Class<T> clazz) {
+		T t = null;
+		try {
+			t = mapper.readValue(input, clazz);
+		} catch (Exception e) {
+			log.error(" parse json to class [{}] error", clazz.getSimpleName());
+		}
+		return t;
+	}
+
+	@Override
+	public byte[] serializeByte(Object object) {
+		if (object == null) {
+			return null;
+		}
+		try {
+			return mapper.writeValueAsBytes(object);
+		} catch (JsonProcessingException e) {
+			log.error(" toJsonString error", e);
+		}
+		return null;
 	}
 
 }

@@ -14,9 +14,6 @@ import org.springframework.core.annotation.AliasFor;
 @ParamAttribute(type = 1)
 public @interface FromBody {
 	
-	/**
-	 * 是否检查参数
-	 */
 	@AliasFor(annotation = ParamAttribute.class)
 	boolean required() default true;
 }

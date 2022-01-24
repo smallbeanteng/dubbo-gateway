@@ -224,14 +224,14 @@ dubbo-gateway 提供了http协议到dubbo协议的转换,但【并非】使用du
       	<dependency>
 			<groupId>com.atommiddleware</groupId>
 			<artifactId>dubbo-gateway-api</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.5</version>
 		</dependency>
 第二步：网关引入改造后的jar包，同时引用以下jar包
 
 	`	<dependency>
 			<groupId>com.atommiddleware</groupId>
 			<artifactId>dubbo-gateway-spring-boot-starter</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.5</version>
 		</dependency>`
 第三步：没有了。。就是这么简单
 ## 项目说明 ##
@@ -245,21 +245,44 @@ dubbo-gateway 提供了http协议到dubbo协议的转换,但【并非】使用du
 - dubbo-gateway-sample-web-provider 基于sevlet类型的dubbo服务提供者示例
 - dubbo-gateway-sample-web-consumer 基于sevlet类型的项目(包括网关比如zuul-1)接入dubbo-gateway示例
 ## 配置中心 ##
-按照dubbo的正常接入配置进行配置就好了，以下贴出例子使用的配置在nacos配置中心的配置
+按照dubbo的正常接入配置进行配置就好了，以下贴出例子使用的配置在nacos配置中心的配置,其中filters使用了Dubbo作为过滤器
 
 服务提供者配置:
-	
-    server.port=8861
-    dubbo.protocol.port=20861
-    dubbo.protocol.name=dubbo
-    spring.cloud.nacos.discovery.server-addr=127.0.0.1:8848
-    spring.cloud.nacos.discovery.namespace=dev
+
+    dubbo:
+      protocol:
+        name: dubbo
+        port: 20861
+    server:
+      port: 8861
+    spring:
+      cloud:
+        nacos:
+          discovery:
+            namespace: dev
+            server-addr: 127.0.0.1:8848
 服务消费者配置：
     
-    server.port=8862
-    dubbo.cloud.subscribed-services=dubbo-gateway-sample-provider
-    spring.cloud.nacos.discovery.server-addr=127.0.0.1:8848
-    spring.cloud.nacos.discovery.namespace=dev
+    dubbo:
+      cloud:
+        subscribed-services: dubbo-gateway-sample-provider
+    server:
+      port: 8862
+    spring:
+      cloud:
+        nacos:
+          discovery:
+            namespace: dev
+            server-addr: 127.0.0.1:8848
+        gateway:
+          routes:
+          - id: myGateway
+            uri: http://127.0.0.1:8862
+            predicates:
+            - Path=/**
+            filters:
+            - Dubbo
+注意：其中filters下面配的"Dubbo"表示使用的是DubboGatewayFilter去处理，如果不配置则不会生效.
 ## 其它说明 ##
 基于webflux的网关与基于servlet类的web应用接入整合方式是一样的步骤，例子使用的nacos版本2.0.3，如果需要在cookie,header,url,传递复杂参数【非java基本类型】，需先将参数转为json,然后使用UrlEncode进行编码，js中可以使用encodeURIComponent进行编码
 

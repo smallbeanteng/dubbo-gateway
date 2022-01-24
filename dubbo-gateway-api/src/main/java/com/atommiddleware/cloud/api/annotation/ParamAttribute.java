@@ -13,21 +13,12 @@ import org.springframework.core.annotation.AliasFor;
 @Documented
 public @interface ParamAttribute {
 
-	/**
-	 * 参数 名称
-	 */
 	@AliasFor("name")
 	String value() default "";
 
-	/**
-	 * 参数 名称
-	 */
 	@AliasFor("value")
 	String name() default "";
 	
-	/**
-	 * 是否检查参数
-	 */
 	boolean required() default true;
 	
 	int type();

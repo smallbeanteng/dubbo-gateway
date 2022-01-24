@@ -1,16 +1,23 @@
 package com.atommiddleware.cloud.core.annotation;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.dubbo.common.utils.ClassUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
+
 import com.atommiddleware.cloud.core.context.DubboApiContext;
 import com.atommiddleware.cloud.core.serialize.Serialization;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -34,24 +41,44 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper {
 		}
 		params[paramInfo.getIndex()] = obj;
 	}
-
-	protected void convertBodyToParam(ParamInfo paramInfo, String body, Object[] params) {
+	private static String inputConvertToString(InputStream input) throws IOException {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+		String str = "";
+		StringBuilder wholeStr = new StringBuilder();
+		while ((str = reader.readLine()) != null) {
+			wholeStr.append(str);
+		}
+		return wholeStr.toString();
+	}
+	protected void convertBodyToParam(ParamInfo paramInfo, InputStream body, Object[] params) {
 		if (paramInfo.isRequired() && StringUtils.isEmpty(body)) {
 			throw new IllegalArgumentException("body Parameter verification exception");
 		}
 		final Map<String, Class<?>> mapClasses = DubboApiContext.MAP_CLASSES;
 		Object param = null;
-		if (!StringUtils.isEmpty(body)) {
+		if (null != body) {
 			Class<?> paramTypeClass = mapClasses.get(paramInfo.getParamType());
-			if (paramTypeClass.isPrimitive()) {
-				param = ClassUtils.convertPrimitive(paramTypeClass, body);
-			} else {
-				if (paramTypeClass == String.class) {
-					param = body;
-				} else {
-					param = serialization.deserialize(body, paramTypeClass);
+			if (paramTypeClass.isPrimitive() || paramTypeClass == String.class) {
+				String bodyString = null;
+				try {
+					bodyString = inputConvertToString(body);
+				} catch (IOException e) {
+					log.error("fail convertBodyToParam");
 				}
+				if (!StringUtils.isEmpty(bodyString)) {
+					if (paramTypeClass.isPrimitive()) {
+						param = ClassUtils.convertPrimitive(paramTypeClass, bodyString);
+					} else {
+						param = bodyString;
+					}
+				}
+			} else {
+				param = serialization.deserialize(body, paramTypeClass);
 			}
+		}
+		if (paramInfo.isRequired() && null == param) {
+			throw new IllegalArgumentException(
+					"paramName:[" + paramInfo.getParamName() + "] Parameter verification exception");
 		}
 		params[paramInfo.getIndex()] = param;
 	}

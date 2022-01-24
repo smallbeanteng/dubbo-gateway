@@ -2,6 +2,7 @@ package com.atommiddleware.cloud.core.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -45,7 +46,15 @@ public class HttpUtils {
 	 * @param request
 	 */
 	public static String getBodyParam(final HttpServletRequest request) throws IOException {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(request.getInputStream()));
+		return inputConvertToString(request.getInputStream());
+	}
+	
+	public static InputStream getBodyInputStream(final HttpServletRequest request) throws IOException {
+		return request.getInputStream();
+	}
+	
+	public static String inputConvertToString(InputStream input) throws IOException {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 		String str = "";
 		StringBuilder wholeStr = new StringBuilder();
 		// 一行一行的读取body体里面的内容；

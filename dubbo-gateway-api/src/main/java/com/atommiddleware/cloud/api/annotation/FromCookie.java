@@ -14,21 +14,12 @@ import org.springframework.core.annotation.AliasFor;
 @ParamAttribute(type = 2)
 public @interface FromCookie {
 
-	/**
-	 * cookie名称
-	 */
 	@AliasFor(annotation = ParamAttribute.class)
 	String value() default "";
 
-	/**
-	 * cookie名称
-	 */
 	@AliasFor(annotation = ParamAttribute.class)
 	String name() default "";
 
-	/**
-	 * 是否检查参数
-	 */
 	@AliasFor(annotation = ParamAttribute.class)
 	boolean required() default true;
 }

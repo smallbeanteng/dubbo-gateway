@@ -124,7 +124,7 @@ public class DefaultDubboApiWrapperFactory extends AbstractDubboApiWrapperFactor
 					: "javax.servlet.http.HttpServletRequest";
 			CtMethod ctMethod = new CtMethod(pool.getCtClass("java.util.concurrent.CompletableFuture"), "handler",
 					new CtClass[] { pool.getCtClass("java.lang.String"), pool.getCtClass(handleTypeClass),
-							pool.getCtClass("java.lang.String") },
+							pool.getCtClass("java.io.InputStream") },
 					stuClass);
 			ctMethod.setModifiers(Modifier.PUBLIC);
 			StringBuilder strBody = new StringBuilder();
@@ -132,6 +132,7 @@ public class DefaultDubboApiWrapperFactory extends AbstractDubboApiWrapperFactor
 			StringBuilder strParamTempConstructor = new StringBuilder();
 			strParamTempConstructor.append("{");
 			strBody.append("{");
+			strBody.append(" try{ ");
 			for (PathMappingMethodInfo pathMappingMethodInfo : listPathMappingMethodInfo) {
 				strParamTemp.setLength(0);
 				String path = pathMappingMethodInfo.getPathMapping().path();
@@ -164,6 +165,7 @@ public class DefaultDubboApiWrapperFactory extends AbstractDubboApiWrapperFactor
 			}
 			strParamTempConstructor.append("}");
 			strBody.append(" return org.apache.dubbo.rpc.RpcContext.getContext().getCompletableFuture(); ");
+			strBody.append(" } finally { if(null!=$3){$3.close();} }");
 			strBody.append(" } ");
 			ctMethod.setBody(strBody.toString());
 			stuClass.addMethod(ctMethod);

@@ -23,7 +23,6 @@ import com.atommiddleware.cloud.core.annotation.ResponseServletResult;
 import com.atommiddleware.cloud.core.config.DubboReferenceConfigProperties;
 import com.atommiddleware.cloud.core.context.DubboApiContext;
 import com.atommiddleware.cloud.core.serialize.Serialization;
-import com.atommiddleware.cloud.core.utils.HttpUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -87,9 +86,9 @@ public class DubboFilter implements Filter, OrderedFilter {
 						return;
 					}
 					// 获取body 执行
-					String bodyString = HttpUtils.getBodyParam(httpServletRequest);
+					//String bodyString = HttpUtils.getBodyParam(httpServletRequest);
 					CompletableFuture completableFuture = dubboApiWrapper.handler(pathPattern, httpServletRequest,
-							bodyString);
+							httpServletRequest.getInputStream());
 					try {
 						responseResult.sevletResponse(httpServletRequest, httpServletResponse,
 								serialization.serialize(completableFuture.get()), false);

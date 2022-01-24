@@ -1,5 +1,6 @@
 package com.atommiddleware.cloud.core.annotation;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,10 +23,10 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class AbstractDubboApiWrapper extends AbstractBaseApiWrapper implements DubboApiWrapper {
 
 	@Override
-	public CompletableFuture handler(String pathPattern, ServerWebExchange exchange, String body) {
+	public CompletableFuture handler(String pathPattern, ServerWebExchange exchange,InputStream input) {
 		throw new UnsupportedOperationException();
 	}
-	protected void handlerConvertParams(String pathPattern, ServerWebExchange exchange, Object[] params, String body)
+	protected void handlerConvertParams(String pathPattern, ServerWebExchange exchange, Object[] params, InputStream body)
 			throws InterruptedException, ExecutionException {
 		ServerHttpRequest serverHttpRequest = exchange.getRequest();
 		final Map<Integer, List<ParamInfo>> mapGroupByParamType = DubboApiContext.MAP_PARAM_INFO.get(pathPattern);
