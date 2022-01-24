@@ -1,0 +1,44 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.atommiddleware</groupId>
+		<artifactId>dubbo-gateway-parent</artifactId>
+		<version>${revision}</version>
+		<relativePath>../dubbo-gateway-parent/pom.xml</relativePath>
+	</parent>
+	<packaging>jar</packaging>
+	<artifactId>dubbo-gateway-core</artifactId>
+	<name>${project.artifactId}</name>
+	<description>The core module of dubbo gateway</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>com.alibaba.cloud</groupId>
+			<artifactId>spring-cloud-starter-dubbo</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>com.atommiddleware</groupId>
+			<artifactId>dubbo-gateway-api</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+</project>

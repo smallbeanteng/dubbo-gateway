@@ -1,0 +1,15 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.atommiddleware.cloud.autoconfigure.DubboGatewayAutoConfiguration,\
+com.atommiddleware.cloud.autoconfigure.DubboGatewayServletAutoConfiguration
+# Bootstrap components
+# org.springframework.cloud.bootstrap.BootstrapConfiguration=\
+# com.atommiddleware.cloud.autoconfigure.DubboGatewayBootstrapConfiguration
+# Application Listeners
+org.springframework.context.ApplicationListener=\
+com.atommiddleware.cloud.core.annotation.DubboGateWayApplicationListener
+# DubboApiWrapperFactory
+com.atommiddleware.cloud.core.annotation.DubboApiWrapperFactory=\
+com.atommiddleware.cloud.core.annotation.DefaultDubboApiWrapperFactory
+# DubboGateWayApplicationContextInitializer
+org.springframework.context.ApplicationContextInitializer=\
+com.atommiddleware.cloud.autoconfigure.DubboGateWayApplicationContextInitializer

@@ -1,9 +1,9 @@
 # dubbo-gateway #
 dubbo-gateway 提供了http协议到dubbo协议的转换,但【并非】使用dubbo的【泛化】调用（泛化调用性能比普通调用有10-20%的损耗,通过普通异步的调用方式与基于webflux系列的响应式网关整合提高系统的吞吐量,普通调用需要依赖api jar包,需要对接口定义进行改造,除此之外不需要做任何其它改造.另外也支持基于servlet类的应用或网关进行整合
 ## 泛化缺点 ##
-- 泛化过程数据流会经过了三次转换, 会产生大量的临时对象, 有很大的内存要求。使用反射方式对于旨在榨干服务器性能以获取高吞吐量的系统来说, 难以达到性能最佳。
-- 同时服务端也会对泛化请求多一重 Map <-> POJO 的来回转换的过程。整体上，与普通的Dubbo调用相比有10-20%的损耗。
-- 泛化调用在网关阶段无法校验参数类型的有效性，所有的流量打到服务端转化才会校验
+- 泛化过程数据流会经过了三次转换, 会产生大量的临时对象, 有很大的内存要求。使用反射方式对于旨在榨干服务器性能以获取高吞吐量的系统来说, 难以达到性能最佳
+- 同时服务端也会对泛化请求多一重 Map <-> POJO 的来回转换的过程。整体上，与普通的Dubbo调用相比有10-20%的损耗
+- 泛化调用在网关或服务消费者阶段无法校验参数类型的有效性，数据要到服务提供者反序列化时才能校验出参数类型的有效性
 ## 相关注解 ##
 ## @GateWayDubbo ##
 标识这个接口需要自动进行协议转换
@@ -25,7 +25,8 @@ dubbo-gateway 提供了http协议到dubbo协议的转换,但【并非】使用du
 	String id() default "";
 ## @PathMapping ##
 标记这个接口方法需要进行协议自动转换
-    	/**
+    
+    /**
 	 * 路径表达式
 	 */
 	@AliasFor("path")
@@ -115,6 +116,8 @@ dubbo-gateway 提供了http协议到dubbo协议的转换,但【并非】使用du
 	@AliasFor(annotation = ParamAttribute.class)
 	boolean required() default true;
 ## @FromQueryParams ##
+表示参数来源于query部分
+
 	/**
 	 * query名称
 	 */
@@ -134,7 +137,8 @@ dubbo-gateway 提供了http协议到dubbo协议的转换,但【并非】使用du
 	boolean required() default true;
 ## @FromAttribute ##
 表示参数来源于attribute
-    	/**
+
+    /**
 	 * attribute 名称
 	 */
 	@AliasFor(annotation = ParamAttribute.class)
