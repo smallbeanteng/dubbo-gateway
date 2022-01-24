@@ -261,6 +261,6 @@ dubbo-gateway 提供了http协议到dubbo协议的转换,但【并非】使用du
     spring.cloud.nacos.discovery.server-addr=127.0.0.1:8848
     spring.cloud.nacos.discovery.namespace=dev
 ## 其它说明 ##
-基于webflux的网关与基于servlet类的web应用接入整合方式是一样的步骤，例子使用的nacos版本2.0.3
+基于webflux的网关与基于servlet类的web应用接入整合方式是一样的步骤，例子使用的nacos版本2.0.3，如果需要在cookie,header,url,传递复杂参数【非java基本类型】，需先将参数转为json,然后使用UrlEncode进行编码，js中可以使用encodeURIComponent进行编码
 
     
