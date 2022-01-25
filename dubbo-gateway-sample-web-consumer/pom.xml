@@ -28,7 +28,7 @@
 		<dependency>
 			<groupId>com.atommiddleware</groupId>
 			<artifactId>dubbo-gateway-sample-api</artifactId>
-			<version>1.0.2</version>
+			<version>1.0.5</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.dubbo</groupId>
@@ -59,7 +59,7 @@
 		<dependency>
 			<groupId>com.atommiddleware</groupId>
 			<artifactId>dubbo-gateway-spring-boot-starter</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.5</version>
 		</dependency>
 	</dependencies>
 </project>
