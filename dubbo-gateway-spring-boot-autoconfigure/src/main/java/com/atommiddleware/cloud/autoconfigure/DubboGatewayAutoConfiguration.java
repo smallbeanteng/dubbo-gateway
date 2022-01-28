@@ -43,6 +43,7 @@ public class DubboGatewayAutoConfiguration {
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
 	public DubboGatewayFilterFactory dubboGatewayFilterFactory(ServerCodecConfigurer serverCodecConfigurer,
 			DubboReferenceConfigProperties dubboReferenceConfigProperties, ResponseReactiveResult responseResult) {
 		return new DubboGatewayFilterFactory(pathMatcher(), serialization(), dubboReferenceConfigProperties,

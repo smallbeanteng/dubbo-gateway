@@ -23,18 +23,21 @@ import com.atommiddleware.cloud.core.annotation.ResponseServletResult;
 import com.atommiddleware.cloud.core.config.DubboReferenceConfigProperties;
 import com.atommiddleware.cloud.core.context.DubboApiContext;
 import com.atommiddleware.cloud.core.serialize.Serialization;
+import com.atommiddleware.cloud.core.utils.HttpUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class DubboFilter implements Filter, OrderedFilter {
+public class DubboServletFilter implements Filter, OrderedFilter {
 
 	private final PathMatcher pathMatcher;
 	private final Serialization serialization;
 	private final ResponseServletResult responseResult;
 	private final int order;
+	private final String APPLICATION_FORM_URLENCODED_UTF8_VALUE = MediaType.APPLICATION_FORM_URLENCODED_VALUE
+			+ ";charset=UTF-8";
 
-	public DubboFilter(PathMatcher pathMatcher, Serialization serialization,
+	public DubboServletFilter(PathMatcher pathMatcher, Serialization serialization,
 			DubboReferenceConfigProperties dubboReferenceConfigProperties, ResponseServletResult responseResult) {
 		this.pathMatcher = pathMatcher;
 		this.serialization = serialization;
@@ -80,24 +83,39 @@ public class DubboFilter implements Filter, OrderedFilter {
 				final DubboApiServletWrapper dubboApiWrapper = dubboApiWrapperTemp;
 				// 只接收get 和post 请求 减少复杂性
 				if (httpMethodName.equals(RequestMethod.POST.name())) {
-					if (!httpServletRequest.getContentType().equals(MediaType.APPLICATION_JSON_VALUE)) {
-						log.error("path:{} body param media must application/json", pathPattern);
+					if (httpServletRequest.getContentType().equals(MediaType.APPLICATION_JSON_VALUE)
+							|| httpServletRequest.getContentType().equals(MediaType.APPLICATION_JSON_UTF8_VALUE)) {
+						// 获取body 执行
+						CompletableFuture completableFuture = dubboApiWrapper.handler(pathPattern, httpServletRequest,
+								HttpUtils.getBodyParam(httpServletRequest));
+						try {
+							responseResult.sevletResponse(httpServletRequest, httpServletResponse,
+									serialization.serialize(completableFuture.get()), false);
+							return;
+						} catch (InterruptedException | ExecutionException e) {
+							log.error("path:[" + pathPattern + "] fail to apply ", e);
+						}
 						response500(httpServletRequest, httpServletResponse);
 						return;
 					}
-					// 获取body 执行
-					//String bodyString = HttpUtils.getBodyParam(httpServletRequest);
-					CompletableFuture completableFuture = dubboApiWrapper.handler(pathPattern, httpServletRequest,
-							httpServletRequest.getInputStream());
-					try {
-						responseResult.sevletResponse(httpServletRequest, httpServletResponse,
-								serialization.serialize(completableFuture.get()), false);
+					else if (httpServletRequest.getContentType().equals(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+							|| httpServletRequest.getContentType().equals(APPLICATION_FORM_URLENCODED_UTF8_VALUE)) {
+						CompletableFuture completableFuture = dubboApiWrapper.handler(pathPattern, httpServletRequest,
+								httpServletRequest.getParameterMap());
+						try {
+							responseResult.sevletResponse(httpServletRequest, httpServletResponse,
+									serialization.serialize(completableFuture.get()), false);
+							return;
+						} catch (InterruptedException | ExecutionException e) {
+							log.error("path:[" + pathPattern + "] fail to apply ", e);
+						}
+						response500(httpServletRequest, httpServletResponse);
 						return;
-					} catch (InterruptedException | ExecutionException e) {
-						log.error("path:[" + pathPattern + "] fail to apply ", e);
+					} else {
+						log.error("path:[{}] body param media must application/json", pathPattern);
+						response500(httpServletRequest, httpServletResponse);
+						return;
 					}
-					response500(httpServletRequest, httpServletResponse);
-					return;
 				} else if (httpMethodName.equals(RequestMethod.GET.name())) {
 					CompletableFuture completableFuture = dubboApiWrapper.handler(pathPattern, httpServletRequest,
 							null);

@@ -1,23 +1,32 @@
 package com.atommiddleware.cloud.core.annotation;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import com.atommiddleware.cloud.core.config.DubboReferenceConfigProperties;
+import com.netflix.zuul.context.RequestContext;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class DefaultResponseServletResult implements ResponseServletResult{
+public class DefaultResponseZuulServletResult implements ResponseZuulServletResult {
 
-	private final String ERRORRESULT="{\"code\": 500}";
+	private final String ERRORRESULT = "{\"code\": 500}";
 	private final DubboReferenceConfigProperties dubboReferenceConfigProperties;
-	public DefaultResponseServletResult(DubboReferenceConfigProperties dubboReferenceConfigProperties) {
-		this.dubboReferenceConfigProperties=dubboReferenceConfigProperties;
+
+	public DefaultResponseZuulServletResult(DubboReferenceConfigProperties dubboReferenceConfigProperties) {
+		this.dubboReferenceConfigProperties = dubboReferenceConfigProperties;
 	}
+
 	@Override
-	public void sevletResponse(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,
-			String result, boolean isErrorResponse) {
+	public Object sevletZuulResponse(String result, boolean isErrorResponse) {
+		RequestContext ctx = RequestContext.getCurrentContext();
+		// zuul 网关直接返回响应，不让请求访问后续的接口
+		ctx.setSendZuulResponse(false);
+		ctx.setResponseStatusCode(500);
+		HttpServletResponse httpServletResponse=ctx.getResponse();
+		HttpServletRequest httpServletRequest=ctx.getRequest();
+		
 		httpServletResponse.setCharacterEncoding(dubboReferenceConfigProperties.getCharset());
 		httpServletResponse.setHeader("Access-Control-Allow-Credentials", "true");
 		httpServletResponse.setHeader("Access-Control-Allow-Methods", "GET,POST");
@@ -31,10 +40,11 @@ public class DefaultResponseServletResult implements ResponseServletResult{
 		}
 		httpServletResponse.setContentType("application/json");
 		try {
-            PrintWriter writer = httpServletResponse.getWriter();
-            writer.print(result);
-        } catch (IOException e) {
-            log.error("outData error------------------:", e);
-        }
+			httpServletResponse.getWriter().write(result);
+		} catch (Exception e) {
+			log.error("sevletZuulResponse fail", e);
+		}
+		return null;
 	}
+
 }

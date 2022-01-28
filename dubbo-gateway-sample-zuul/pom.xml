@@ -2,7 +2,6 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
 	<parent>
 		<groupId>com.atommiddleware</groupId>
 		<artifactId>dubbo-gateway-parent</artifactId>
@@ -10,9 +9,9 @@
 		<relativePath>../dubbo-gateway-parent/pom.xml</relativePath>
 	</parent>
 	<packaging>jar</packaging>
-	<artifactId>dubbo-gateway-sample</artifactId>
+	<artifactId>dubbo-gateway-sample-zuul</artifactId>
 	<name>${project.artifactId}</name>
-	<description>The sample of dubbo gateway</description>
+	<description>The zuul sample of dubbo gateway</description>
 
 	<dependencies>
 		<dependency>
@@ -39,20 +38,24 @@
 			<version>1.0.11</version>
 		</dependency>
 		<dependency>
-			<groupId>com.alibaba.cloud</groupId>
-			<artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.alibaba.cloud</groupId>
-			<artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-zuul</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-gateway</artifactId>
+			<groupId>com.alibaba.cloud</groupId>
+			<artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.alibaba.cloud</groupId>
+			<artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
 		</dependency>
 	</dependencies>
 	<build>
@@ -61,7 +64,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
-					<mainClass>com.atommiddleware.cloud.sample.App</mainClass>
+					<mainClass>com.atommiddleware.cloud.zuul.App</mainClass>
 				</configuration>
 				<version>${spring-boot.version}</version>
 				<executions>

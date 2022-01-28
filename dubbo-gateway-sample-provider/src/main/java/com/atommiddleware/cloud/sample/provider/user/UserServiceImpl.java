@@ -2,6 +2,7 @@ package com.atommiddleware.cloud.sample.provider.user;
 
 import org.apache.dubbo.config.annotation.DubboService;
 
+import com.alibaba.nacos.shaded.io.grpc.netty.shaded.io.netty.util.internal.ThreadLocalRandom;
 import com.atommiddleware.cloud.sample.api.Result;
 import com.atommiddleware.cloud.sample.api.user.UserService;
 import com.atommiddleware.cloud.sample.api.user.domain.User;
@@ -10,6 +11,15 @@ import com.atommiddleware.cloud.sample.api.user.domain.User;
 public class UserServiceImpl implements UserService {
 	@Override
 	public Result registerUser(User user) {
+		int time=ThreadLocalRandom.current().nextInt(20, 150);
+		try {
+			Thread.sleep(time);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		if(time%9==0) {
+		System.out.println(user);
+		}
 		return Result.from().setData("user", user);
 	}
 

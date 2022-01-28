@@ -9,6 +9,7 @@ import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.NettyDataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerCodecConfigurer;
@@ -92,46 +93,81 @@ public class DubboGatewayFilter implements GatewayFilter, Ordered {
 				return response500(exchange, response);
 			} else {
 				final DubboApiWrapper dubboApiWrapper = dubboApiWrapperTemp;
-
 				if (httpMethodName.equals(RequestMethod.POST.name())) {
-					if (!exchange.getRequest().getHeaders().getContentType().equals(MediaType.APPLICATION_JSON)) {
-						log.error("path:[{}] body param media must application/json", pathPattern);
-						return response500(exchange, response);
-					}
-					Object attrBody = exchange.getAttribute(CACHED_REQUEST_BODY_ATTR);
-					if (null != attrBody) {
-						NettyDataBuffer nettyDataBuffer = (NettyDataBuffer) attrBody;
-						return responseResult.reactiveFluxResponse(exchange, response,
-								Flux.just(nettyDataBuffer).flatMap(o -> {
-									return Mono
-											.fromFuture(
-													dubboApiWrapper.handler(pathPattern, exchange, o.asInputStream()))
-											.flatMap(k -> {
-												return Mono.just(
-														response.bufferFactory().wrap(serialization.serializeByte(k)));
-											});
-								}), false);
-					} else {
-						ServerRequest serverRequest = ServerRequest.create(exchange,
-								serverCodecConfigurer.getReaders());
-						return responseResult.reactiveFluxResponse(exchange, response,
-								Flux.just(serverRequest.bodyToMono(DataBuffer.class)).flatMap(u -> {
-									return u.flatMap(o -> {
-										return Mono.fromFuture(
-												dubboApiWrapper.handler(pathPattern, exchange, o.asInputStream()))
+					if (exchange.getRequest().getHeaders().getContentType().equals(MediaType.APPLICATION_JSON)
+							|| exchange.getRequest().getHeaders().getContentType()
+									.equals(MediaType.APPLICATION_JSON_UTF8)) {
+						Object attrBody = exchange.getAttribute(CACHED_REQUEST_BODY_ATTR);
+						if (null != attrBody) {
+							NettyDataBuffer nettyDataBuffer = (NettyDataBuffer) attrBody;
+							return responseResult.reactiveFluxResponse(exchange, response,
+									Flux.just(nettyDataBuffer).flatMap(o -> {
+										byte[] bytes = new byte[o.readableByteCount()];
+										o.read(bytes);
+										DataBufferUtils.release(o);
+										String bodyString = null;
+										try {
+											bodyString = new String(bytes, dubboReferenceConfigProperties.getCharset());
+										} catch (UnsupportedEncodingException e) {
+											log.error("fai", e);
+											return Mono.just(response.bufferFactory().wrap(errorResultByte));
+										}
+
+										return Mono
+												.fromFuture(dubboApiWrapper.handler(pathPattern, exchange, bodyString))
 												.flatMap(k -> {
 													return Mono.just(response.bufferFactory()
 															.wrap(serialization.serializeByte(k)));
 												});
-									});
-								}), false);
+									}), false);
+						} else {
+							ServerRequest serverRequest = ServerRequest.create(exchange,
+									serverCodecConfigurer.getReaders());
+							return responseResult.reactiveFluxResponse(exchange, response,
+									Flux.just(serverRequest.bodyToMono(DataBuffer.class)).flatMap(u -> {
+										return u.flatMap(o -> {
+											byte[] bytes = new byte[o.readableByteCount()];
+											o.read(bytes);
+											DataBufferUtils.release(o);
+											String bodyString = null;
+											try {
+												bodyString = new String(bytes,
+														dubboReferenceConfigProperties.getCharset());
+											} catch (UnsupportedEncodingException e) {
+												log.error("fai", e);
+												return Mono.just(response.bufferFactory().wrap(errorResultByte));
+											}
+											return Mono
+													.fromFuture(
+															dubboApiWrapper.handler(pathPattern, exchange, bodyString))
+													.flatMap(k -> {
+														return Mono.just(response.bufferFactory()
+																.wrap(serialization.serializeByte(k)));
+													});
+										});
+									}), false);
+						}
+					} else if (exchange.getRequest().getHeaders().getContentType()
+							.equals(MediaType.APPLICATION_FORM_URLENCODED)) {
+						// form表单形式
+						ServerRequest serverRequest = ServerRequest.create(exchange,
+								serverCodecConfigurer.getReaders());
+						Flux<DataBuffer> fx = Flux.from(serverRequest.formData().flatMap(o -> {
+							return Mono.fromFuture(dubboApiWrapper.handler(pathPattern, exchange, o)).flatMap(k -> {
+								return Mono.just(response.bufferFactory().wrap(serialization.serializeByte(k)));
+							});
+						}));
+						return responseResult.reactiveFluxResponse(exchange, response, fx, false);
+					} else {
+						log.error("path:[{}] body param media must application/json", pathPattern);
+						return response500(exchange, response);
 					}
-
 				} else if (httpMethodName.equals(RequestMethod.GET.name())) {
 					Flux<DataBuffer> fx = Flux
 							.from(Mono.fromFuture(dubboApiWrapper.handler(pathPattern, exchange, null)).flatMap(k -> {
 								return Mono.just(response.bufferFactory().wrap(serialization.serializeByte(k)));
 							}));
+
 					return responseResult.reactiveFluxResponse(exchange, response, fx, false);
 				} else {
 					log.error("Only get and post are supported for the time being path:[{}] requestMethod:[{}]",

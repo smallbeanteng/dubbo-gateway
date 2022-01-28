@@ -1,12 +1,14 @@
 spring:
   application:
-    name: dubbo-gateway-sample
+    name: dubbo-gateway-sample-zuul
   cloud:
     nacos:
       config:
         namespace: dev
-        prefix: dubbo-gateway-sample
+        prefix: dubbo-gateway-sample-zuul
         server-addr: 127.0.0.1:8848
         file-extension: yml
 logging:
-  path: /mnt/logs        
+  path: /mnt/logs
+
+       

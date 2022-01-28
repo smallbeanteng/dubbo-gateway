@@ -1,6 +1,6 @@
 package com.atommiddleware.cloud.core.annotation;
 
-import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,11 +23,11 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class AbstractDubboApiWrapper extends AbstractBaseApiWrapper implements DubboApiWrapper {
 
 	@Override
-	public CompletableFuture handler(String pathPattern, ServerWebExchange exchange,InputStream input) {
+	public CompletableFuture handler(String pathPattern, ServerWebExchange exchange,Object body) {
 		throw new UnsupportedOperationException();
 	}
-	protected void handlerConvertParams(String pathPattern, ServerWebExchange exchange, Object[] params, InputStream body)
-			throws InterruptedException, ExecutionException {
+	protected void handlerConvertParams(String pathPattern, ServerWebExchange exchange, Object[] params, Object body)
+			throws InterruptedException, ExecutionException, IllegalAccessException, InvocationTargetException, InstantiationException {
 		ServerHttpRequest serverHttpRequest = exchange.getRequest();
 		final Map<Integer, List<ParamInfo>> mapGroupByParamType = DubboApiContext.MAP_PARAM_INFO.get(pathPattern);
 		final Map<String, String> mapPathParams = new HashMap<String, String>();
@@ -43,6 +43,7 @@ public abstract class AbstractDubboApiWrapper extends AbstractBaseApiWrapper imp
 			});
 			convertParam(listParams, mapPathParams, params);
 		}
+		
 		// body
 		listParams = mapGroupByParamType.get(ParamFromType.FROM_BODY.getParamFromType());
 		if (!CollectionUtils.isEmpty(listParams)) {
@@ -70,6 +71,7 @@ public abstract class AbstractDubboApiWrapper extends AbstractBaseApiWrapper imp
 					.putAll(pathMatcher.extractUriTemplateVariables(pathPattern, serverHttpRequest.getPath().value()));
 			convertParam(listParams, mapPathParams, params);
 		}
+		
 		// queryParams
 		listParams = mapGroupByParamType.get(ParamFromType.FROM_QUERYPARAMS.getParamFromType());
 		if (!CollectionUtils.isEmpty(listParams)) {

@@ -1,6 +1,7 @@
 package com.atommiddleware.cloud.core.annotation;
 
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -17,11 +18,11 @@ import com.atommiddleware.cloud.core.utils.HttpUtils;
 public abstract class AbstractDubboApiServletWrapper extends AbstractBaseApiWrapper implements DubboApiServletWrapper{
 
 	@Override
-	public CompletableFuture handler(String pathPattern, HttpServletRequest httpServletRequest, InputStream body) {
+	public CompletableFuture handler(String pathPattern, HttpServletRequest httpServletRequest, Object body) {
 		  throw new UnsupportedOperationException();
 	}
 	
-	protected void handlerConvertParams(String pathPattern, HttpServletRequest httpServletRequest, Object[] params, InputStream body) throws InterruptedException, ExecutionException {
+	protected void handlerConvertParams(String pathPattern, HttpServletRequest httpServletRequest, Object[] params, Object body) throws InterruptedException, ExecutionException, IllegalAccessException, InvocationTargetException, InstantiationException {
 		final Map<Integer, List<ParamInfo>> mapGroupByParamType = DubboApiContext.MAP_PARAM_INFO.get(pathPattern);
 		final Map<String, String> mapPathParams = new HashMap<String, String>();
 		// cookie

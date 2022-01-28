@@ -1,10 +1,8 @@
 package com.atommiddleware.cloud.core.annotation;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +10,7 @@ import java.util.Set;
 
 import org.apache.dubbo.common.utils.ClassUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 
@@ -41,16 +40,9 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper {
 		}
 		params[paramInfo.getIndex()] = obj;
 	}
-	private static String inputConvertToString(InputStream input) throws IOException {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-		String str = "";
-		StringBuilder wholeStr = new StringBuilder();
-		while ((str = reader.readLine()) != null) {
-			wholeStr.append(str);
-		}
-		return wholeStr.toString();
-	}
-	protected void convertBodyToParam(ParamInfo paramInfo, InputStream body, Object[] params) {
+
+	protected void convertBodyToParam(ParamInfo paramInfo, Object body, Object[] params)
+			throws IllegalAccessException, InvocationTargetException, InstantiationException {
 		if (paramInfo.isRequired() && StringUtils.isEmpty(body)) {
 			throw new IllegalArgumentException("body Parameter verification exception");
 		}
@@ -58,22 +50,47 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper {
 		Object param = null;
 		if (null != body) {
 			Class<?> paramTypeClass = mapClasses.get(paramInfo.getParamType());
-			if (paramTypeClass.isPrimitive() || paramTypeClass == String.class) {
+			if (paramInfo.isSimpleType()) {
 				String bodyString = null;
-				try {
-					bodyString = inputConvertToString(body);
-				} catch (IOException e) {
-					log.error("fail convertBodyToParam");
-				}
-				if (!StringUtils.isEmpty(bodyString)) {
-					if (paramTypeClass.isPrimitive()) {
-						param = ClassUtils.convertPrimitive(paramTypeClass, bodyString);
+				if (body instanceof String) {
+					bodyString = (String) body;
+				} else {
+					if (body instanceof MultiValueMap) {
+						MultiValueMap<String, String> multiValueMap = (MultiValueMap<String, String>) body;
+						bodyString = multiValueMap.getFirst(paramInfo.getParamName());
+						multiValueMap.clear();
 					} else {
-						param = bodyString;
+						Map<String, String[]> mapValue = (Map<String, String[]>) body;
+						String[] strValues = mapValue.get(paramInfo.getParamName());
+						if (null != strValues && strValues.length > 0) {
+							bodyString = strValues[0];
+						}
+						mapValue.clear();
 					}
 				}
+				if (!StringUtils.isEmpty(bodyString)) {
+					param = ClassUtils.convertPrimitive(paramTypeClass, bodyString);
+				}
 			} else {
-				param = serialization.deserialize(body, paramTypeClass);
+				if (body instanceof String) {
+					param = serialization.deserialize((String) body, paramTypeClass);
+				} else {
+					if (body instanceof MultiValueMap) {
+						MultiValueMap<String, String> multiValueMap = (MultiValueMap<String, String>) body;
+						param = serialization.convertValue(multiValueMap.toSingleValueMap(), paramTypeClass);
+						multiValueMap.clear();
+					} else {
+						Map<String, String[]> multiValueMap = (Map<String, String[]>) body;
+						Map<String, String> mapValues = new HashMap<String, String>();
+						multiValueMap.forEach((key, v) -> {
+							if (null != v && v.length > 0) {
+								mapValues.put(key, v[0]);
+							}
+						});
+						param = serialization.convertValue(mapValues, paramTypeClass);
+						mapValues.clear();
+					}
+				}
 			}
 		}
 		if (paramInfo.isRequired() && null == param) {
@@ -87,6 +104,7 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper {
 		String paramValue = null;
 		Object param = null;
 		final Map<String, Class<?>> mapClasses = DubboApiContext.MAP_CLASSES;
+		Class<?> paramTypeClass;
 		for (ParamInfo paramInfo : listParams) {
 			param = null;
 			paramValue = mapPathParams.get(paramInfo.getParamName());
@@ -95,20 +113,16 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper {
 						"paramName:[" + paramInfo.getParamName() + "] Parameter verification exception");
 			}
 			if (!StringUtils.isEmpty(paramValue)) {
-				Class<?> paramTypeClass = mapClasses.get(paramInfo.getParamType());
-				if (paramTypeClass.isPrimitive()) {
+				paramTypeClass = mapClasses.get(paramInfo.getParamType());
+				if (ClassUtils.isSimpleType(paramTypeClass)) {
 					param = ClassUtils.convertPrimitive(paramTypeClass, paramValue);
 				} else {
-					if (paramTypeClass == String.class) {
-						param = paramValue;
-					} else {
-						try {
-							paramValue = java.net.URLDecoder.decode(paramValue, DubboApiContext.CHARSET);
-						} catch (UnsupportedEncodingException e) {
-							log.error("decode fail", e);
-						}
-						param = serialization.deserialize(paramValue, paramTypeClass);
+					try {
+						paramValue = java.net.URLDecoder.decode(paramValue, DubboApiContext.CHARSET);
+					} catch (UnsupportedEncodingException e) {
+						log.error("decode fail", e);
 					}
+					param = serialization.deserialize(paramValue, paramTypeClass);
 				}
 			}
 			params[paramInfo.getIndex()] = param;

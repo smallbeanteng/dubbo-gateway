@@ -13,4 +13,6 @@ public interface Serialization {
 	<T> T deserialize(@NonNull String input, Class<T> clazz);
 	
 	<T> T deserialize(@NonNull InputStream input, Class<T> clazz);
+	
+	<T> T convertValue(Object obj,Class<T> clazz);
 }

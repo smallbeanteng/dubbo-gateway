@@ -1,15 +1,19 @@
 package com.atommiddleware.cloud.core.annotation;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import org.apache.dubbo.common.bytecode.CustomizedLoaderClassPath;
+import org.apache.dubbo.common.utils.ClassUtils;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -40,6 +44,20 @@ import javassist.bytecode.annotation.BooleanMemberValue;
 public class DefaultDubboApiWrapperFactory extends AbstractDubboApiWrapperFactory {
 
 	private static AtomicLong WRAPPER_CLASS_COUNTER = new AtomicLong(0);
+	  private static final Map<ClassLoader, ClassPool> POOL_MAP = new ConcurrentHashMap<ClassLoader, ClassPool>(); //ClassLoader - ClassPool
+    public static ClassPool getClassPool(ClassLoader loader) {
+        if (loader == null) {
+            return ClassPool.getDefault();
+        }
+
+        ClassPool pool = POOL_MAP.get(loader);
+        if (pool == null) {
+            pool = new ClassPool(true);
+            pool.appendClassPath(new CustomizedLoaderClassPath(loader));
+            POOL_MAP.put(loader, pool);
+        }
+        return pool;
+    }
 
 	@Override
 	public Class<?> make(String id, Class<?> interfaceClass,
@@ -62,6 +80,9 @@ public class DefaultDubboApiWrapperFactory extends AbstractDubboApiWrapperFactor
 					Parameter[] parameters = o.getParameters();
 					Class<?>[] typeParameters = o.getParameterTypes();
 					int i = 0;
+					boolean isSimpleType = true;
+					boolean isAllChildSimpleType = true;
+					Class<?> currentType = null;
 					for (Parameter p : parameters) {
 						if (!mapClasses.containsKey(typeParameters[i].getName())) {
 							mapClasses.put(typeParameters[i].getName(), typeParameters[i]);
@@ -74,12 +95,47 @@ public class DefaultDubboApiWrapperFactory extends AbstractDubboApiWrapperFactor
 									throw new IllegalArgumentException("ParamAttribute verification exception");
 								}
 							}
+							currentType = typeParameters[i];
+							isSimpleType = true;
+							isAllChildSimpleType = true;
+							if (ClassUtils.isSimpleType(currentType)) {
+								isSimpleType = true;
+								isAllChildSimpleType = true;
+							} else {
+								isSimpleType = false;
+								// 遍历所有参数
+								boolean flag = false;
+								for (Field f : currentType.getDeclaredFields()) {
+									flag = f.isAccessible();
+									f.setAccessible(true);
+									if (!ClassUtils.isSimpleType(f.getType())) {
+										isAllChildSimpleType = false;
+										f.setAccessible(flag);
+										break;
+									}
+								}
+								if (isAllChildSimpleType) {
+									// 获取父类属性
+									for (Field f : currentType.getFields()) {
+										flag = f.isAccessible();
+										f.setAccessible(true);
+										if (!ClassUtils.isSimpleType(f.getType())) {
+											isAllChildSimpleType = false;
+											f.setAccessible(flag);
+											break;
+										}
+									}
+								}
+							}
 							// p.get
-							pathMappingMethodInfo.getListParamMeta()
-									.add(new ParamMeta(
-											an.type() == ParamFromType.FROM_BODY.getParamFromType() ? ""
-													: StringUtils.isEmpty(an.name()) ? strParamNames[i] : an.name(),
-											typeParameters[i].getName(), an));
+							pathMappingMethodInfo
+									.getListParamMeta().add(
+											new ParamMeta(
+													an.type() == ParamFromType.FROM_BODY.getParamFromType() ? ""
+															: StringUtils.isEmpty(an.name()) ? strParamNames[i]
+																	: an.name(),
+													typeParameters[i].getName(), an, isSimpleType,
+													isAllChildSimpleType));
 
 						} else {
 							throw new IllegalArgumentException("ParamAttribute verification exception");
@@ -91,7 +147,7 @@ public class DefaultDubboApiWrapperFactory extends AbstractDubboApiWrapperFactor
 			}
 		});
 		if (!CollectionUtils.isEmpty(listPathMappingMethodInfo)) {
-			ClassPool pool = ClassPool.getDefault();
+			ClassPool pool =getClassPool(Thread.currentThread().getContextClassLoader());
 			// id
 			long idx = WRAPPER_CLASS_COUNTER.getAndIncrement();
 			// class
@@ -124,7 +180,7 @@ public class DefaultDubboApiWrapperFactory extends AbstractDubboApiWrapperFactor
 					: "javax.servlet.http.HttpServletRequest";
 			CtMethod ctMethod = new CtMethod(pool.getCtClass("java.util.concurrent.CompletableFuture"), "handler",
 					new CtClass[] { pool.getCtClass("java.lang.String"), pool.getCtClass(handleTypeClass),
-							pool.getCtClass("java.io.InputStream") },
+							pool.getCtClass("java.lang.Object") },
 					stuClass);
 			ctMethod.setModifiers(Modifier.PUBLIC);
 			StringBuilder strBody = new StringBuilder();
@@ -132,7 +188,6 @@ public class DefaultDubboApiWrapperFactory extends AbstractDubboApiWrapperFactor
 			StringBuilder strParamTempConstructor = new StringBuilder();
 			strParamTempConstructor.append("{");
 			strBody.append("{");
-			strBody.append(" try{ ");
 			for (PathMappingMethodInfo pathMappingMethodInfo : listPathMappingMethodInfo) {
 				strParamTemp.setLength(0);
 				String path = pathMappingMethodInfo.getPathMapping().path();
@@ -146,7 +201,8 @@ public class DefaultDubboApiWrapperFactory extends AbstractDubboApiWrapperFactor
 					ParamInfo paramInfo;
 					for (ParamMeta paramMeta : pathMappingMethodInfo.getListParamMeta()) {
 						paramInfo = new ParamInfo(i, paramMeta.getParamName(), paramMeta.getParamAttribute().type(),
-								paramMeta.getParamType(), paramMeta.getParamAttribute().required());
+								paramMeta.getParamType(), paramMeta.isSimpleType(), paramMeta.isChildAllSimpleType(),
+								paramMeta.getParamAttribute().required());
 						listParamInfo.add(paramInfo);
 						strParamTemp.append("(" + paramMeta.getParamType() + ")params[" + i + "],");
 						i++;
@@ -165,7 +221,6 @@ public class DefaultDubboApiWrapperFactory extends AbstractDubboApiWrapperFactor
 			}
 			strParamTempConstructor.append("}");
 			strBody.append(" return org.apache.dubbo.rpc.RpcContext.getContext().getCompletableFuture(); ");
-			strBody.append(" } finally { if(null!=$3){$3.close();} }");
 			strBody.append(" } ");
 			ctMethod.setBody(strBody.toString());
 			stuClass.addMethod(ctMethod);

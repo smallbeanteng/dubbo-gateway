@@ -77,4 +77,15 @@ public class JacksonSerialization implements Serialization {
 		return null;
 	}
 
+	@Override
+	public <T> T convertValue(Object obj, Class<T> clazz) {
+		T t = null;
+		try {
+			t = mapper.convertValue(obj, clazz);
+		} catch (Exception e) {
+			log.error(" parse json to class [{}] error", clazz.getSimpleName());
+		}
+		return t;
+	}
+
 }

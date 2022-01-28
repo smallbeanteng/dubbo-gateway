@@ -3,20 +3,20 @@ package com.atommiddleware.cloud.sample.api.user.domain;
 import java.io.Serializable;
 import java.util.Arrays;
 
-public class User implements Serializable{
+public class User implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	private String userName;
-	
+
 	private String password;
-	
+
 	private Integer age;
-	
+
 	private Short gender;
-	
-	private WorkHistory workHistory;
-	
+
+	private WorkHistory workHistory = new WorkHistory();
+
 	public String getUserName() {
 		return userName;
 	}
@@ -57,7 +57,6 @@ public class User implements Serializable{
 		this.workHistory = workHistory;
 	}
 
-	
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -75,14 +74,23 @@ public class User implements Serializable{
 		return builder.toString();
 	}
 
+	public class WorkHistory implements Serializable {
 
-	public class WorkHistory implements Serializable{
-		
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
 		private String[] workDescriptions;
+
+		private String companyName;
+
+		public String getCompanyName() {
+			return companyName;
+		}
+
+		public void setCompanyName(String companyName) {
+			this.companyName = companyName;
+		}
 
 		public String[] getWorkDescriptions() {
 			return workDescriptions;

@@ -18,6 +18,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+			<dubbo.gateway.version>1.0.7</dubbo.gateway.version>
 	</properties>
 
 	<dependencies>
@@ -28,7 +29,7 @@
 		<dependency>
 			<groupId>com.atommiddleware</groupId>
 			<artifactId>dubbo-gateway-sample-api</artifactId>
-			<version>1.0.5</version>
+			<version>${dubbo.gateway.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.dubbo</groupId>
@@ -59,7 +60,7 @@
 		<dependency>
 			<groupId>com.atommiddleware</groupId>
 			<artifactId>dubbo-gateway-spring-boot-starter</artifactId>
-			<version>1.0.5</version>
+			<version>${dubbo.gateway.version}</version>
 		</dependency>
 	</dependencies>
 </project>
