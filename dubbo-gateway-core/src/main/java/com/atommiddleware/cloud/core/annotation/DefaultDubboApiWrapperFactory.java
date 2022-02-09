@@ -201,7 +201,7 @@ public class DefaultDubboApiWrapperFactory extends AbstractDubboApiWrapperFactor
 					ParamInfo paramInfo;
 					for (ParamMeta paramMeta : pathMappingMethodInfo.getListParamMeta()) {
 						paramInfo = new ParamInfo(i, paramMeta.getParamName(), paramMeta.getParamAttribute().type(),
-								paramMeta.getParamType(), paramMeta.isSimpleType(), paramMeta.isChildAllSimpleType(),
+								paramMeta.getParamType(),paramMeta.getParamAttribute().paramFormat(),paramMeta.isSimpleType(), paramMeta.isChildAllSimpleType(),
 								paramMeta.getParamAttribute().required());
 						listParamInfo.add(paramInfo);
 						strParamTemp.append("(" + paramMeta.getParamType() + ")params[" + i + "],");

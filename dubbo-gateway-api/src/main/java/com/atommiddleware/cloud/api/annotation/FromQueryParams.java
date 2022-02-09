@@ -22,4 +22,7 @@ public @interface FromQueryParams {
 	
 	@AliasFor(annotation = ParamAttribute.class)
 	boolean required() default true;
+	
+	@AliasFor(annotation = ParamAttribute.class)
+	int paramFormat() default 1;
 }

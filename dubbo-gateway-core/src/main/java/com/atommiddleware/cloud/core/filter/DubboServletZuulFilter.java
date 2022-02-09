@@ -68,7 +68,6 @@ public class DubboServletZuulFilter extends ZuulFilter {
 	@Override
 	public Object run() throws ZuulException {
 		RequestContext ctx = RequestContext.getCurrentContext();
-		// ctx.setSendZuulResponse(false);
 		HttpServletRequest httpServletRequest = ctx.getRequest();
 		HttpServletResponse httpServletResponse = ctx.getResponse();
 		String path = httpServletRequest.getRequestURI();

@@ -2,7 +2,7 @@ package com.atommiddleware.cloud.core.annotation;
 
 public class ParamInfo {
 	
-	public ParamInfo(int index,String paramName,int paramFromType,String paramType,boolean simpleType,boolean childAllSimpleType,boolean required) {
+	public ParamInfo(int index,String paramName,int paramFromType,String paramType,int paramFormat, boolean simpleType,boolean childAllSimpleType,boolean required) {
 		this.index=index;
 		this.paramName=paramName;
 		this.paramFromType=paramFromType;
@@ -10,6 +10,7 @@ public class ParamInfo {
 		this.simpleType=simpleType;
 		this.childAllSimpleType=simpleType;
 		this.required=required;
+		this.paramFormat=paramFormat;
 	}
 
 	private int index;
@@ -25,6 +26,8 @@ public class ParamInfo {
 	private boolean childAllSimpleType;
 	
 	private boolean required;
+	
+	private int paramFormat;
 	
 	public int getIndex() {
 		return index;
@@ -80,5 +83,13 @@ public class ParamInfo {
 
 	public void setRequired(boolean required) {
 		this.required = required;
+	}
+
+	public int getParamFormat() {
+		return paramFormat;
+	}
+
+	public void setParamFormat(int paramFormat) {
+		this.paramFormat = paramFormat;
 	}
 }

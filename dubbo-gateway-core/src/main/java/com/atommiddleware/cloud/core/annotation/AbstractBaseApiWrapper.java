@@ -14,6 +14,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 
+import com.atommiddleware.cloud.api.annotation.ParamAttribute.ParamFormat;
 import com.atommiddleware.cloud.core.context.DubboApiContext;
 import com.atommiddleware.cloud.core.serialize.Serialization;
 
@@ -107,16 +108,17 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper {
 		Class<?> paramTypeClass;
 		for (ParamInfo paramInfo : listParams) {
 			param = null;
-			paramValue = mapPathParams.get(paramInfo.getParamName());
-			if (paramInfo.isRequired() && null == paramValue) {
-				throw new IllegalArgumentException(
-						"paramName:[" + paramInfo.getParamName() + "] Parameter verification exception");
-			}
-			if (!StringUtils.isEmpty(paramValue)) {
-				paramTypeClass = mapClasses.get(paramInfo.getParamType());
-				if (ClassUtils.isSimpleType(paramTypeClass)) {
-					param = ClassUtils.convertPrimitive(paramTypeClass, paramValue);
-				} else {
+			paramTypeClass = mapClasses.get(paramInfo.getParamType());
+			if (ClassUtils.isSimpleType(paramTypeClass)) {
+				paramValue = mapPathParams.get(paramInfo.getParamName());
+				if (!StringUtils.isEmpty(paramValue)) {
+				param = ClassUtils.convertPrimitive(paramTypeClass, paramValue);
+				}
+			}else {
+				if(paramInfo.getParamFormat()==ParamFormat.MAP.ordinal()) {
+					param= serialization.convertValue(mapPathParams, paramTypeClass);
+				}else {
+					paramValue = mapPathParams.get(paramInfo.getParamName());
 					try {
 						paramValue = java.net.URLDecoder.decode(paramValue, DubboApiContext.CHARSET);
 					} catch (UnsupportedEncodingException e) {
@@ -124,6 +126,10 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper {
 					}
 					param = serialization.deserialize(paramValue, paramTypeClass);
 				}
+			}
+			if (paramInfo.isRequired() && null == param) {
+				throw new IllegalArgumentException(
+						"paramName:[" + paramInfo.getParamName() + "] Parameter verification exception");
 			}
 			params[paramInfo.getIndex()] = param;
 		}

@@ -23,6 +23,5 @@ public @interface PathMapping {
 	
 	public enum RequestMethod {
 		GET, POST
-
 	}
 }

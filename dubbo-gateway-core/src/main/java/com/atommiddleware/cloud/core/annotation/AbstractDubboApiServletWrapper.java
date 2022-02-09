@@ -1,17 +1,20 @@
 package com.atommiddleware.cloud.core.annotation;
 
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+
 import com.atommiddleware.cloud.core.context.DubboApiContext;
 import com.atommiddleware.cloud.core.utils.HttpUtils;
 
@@ -24,7 +27,7 @@ public abstract class AbstractDubboApiServletWrapper extends AbstractBaseApiWrap
 	
 	protected void handlerConvertParams(String pathPattern, HttpServletRequest httpServletRequest, Object[] params, Object body) throws InterruptedException, ExecutionException, IllegalAccessException, InvocationTargetException, InstantiationException {
 		final Map<Integer, List<ParamInfo>> mapGroupByParamType = DubboApiContext.MAP_PARAM_INFO.get(pathPattern);
-		final Map<String, String> mapPathParams = new HashMap<String, String>();
+		final Map<String, String> mapPathParams = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		// cookie
 		List<ParamInfo> listParams = mapGroupByParamType.get(ParamFromType.FROM_COOKIE.getParamFromType());
 		if (!CollectionUtils.isEmpty(listParams)) {
@@ -45,12 +48,16 @@ public abstract class AbstractDubboApiServletWrapper extends AbstractBaseApiWrap
 		// header
 		listParams = mapGroupByParamType.get(ParamFromType.FROM_HEADER.getParamFromType());
 		if (!CollectionUtils.isEmpty(listParams)) {
-			listParams.forEach(o -> {
-				String headerValue = httpServletRequest.getHeader(o.getParamName());
-				if (!StringUtils.isEmpty(headerValue)) {
-					mapPathParams.put(o.getParamName(), headerValue);
-				}
-			});
+			Enumeration<String> enumHeaderNames = httpServletRequest.getHeaderNames();
+			String headerValue=null;
+			String headerName=null;
+		      while (enumHeaderNames.hasMoreElements()){
+		    	  headerName=enumHeaderNames.nextElement();
+		    	  headerValue = httpServletRequest.getHeader(headerName);
+		    	  if (!StringUtils.isEmpty(headerValue)) {
+		    		mapPathParams.put(headerName.toLowerCase(),headerValue);
+		    	  }
+		      }
 			convertParam(listParams, mapPathParams, params);
 		}
 

@@ -1,0 +1,482 @@
+{
+	"info": {
+		"_postman_id": "46a4cc78-9298-4da2-8cff-2d74101a6a7c",
+		"name": "dubboGateWay",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "注册用户",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"userName\": \"admin\",\r\n    \"password\": \"123456\",\r\n\t\"age\": 99,\r\n\t\"gender\": 1,\r\n\t\"workHistory\": {\"workDescriptions\": [\"中学\",\"大学\"]} \r\n}"
+				},
+				"url": {
+					"raw": "http://{{host}}:{{port}}/sample/registerUser",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"sample",
+						"registerUser"
+					]
+				},
+				"description": "注册用户"
+			},
+			"response": []
+		},
+		{
+			"name": "注册用户数据来源于jsonHeader",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "user",
+						"value": "%7B%0A%20%20%20%20%22userName%22%3A%20%22admin%22%2C%0A%20%20%20%20%22password%22%3A%20%22123456%22%2C%0A%09%22age%22%3A%2099%2C%0A%09%22gender%22%3A%201%2C%0A%09%22workHistory%22%3A%20%7B%22workDescriptions%22%3A%20%5B%22%E4%B8%AD%E5%AD%A6%22%2C%22%E5%A4%A7%E5%AD%A6%22%5D%7D%20%0A%7D",
+						"type": "text"
+					},
+					{
+						"key": "a",
+						"value": "zzzzz",
+						"type": "text"
+					},
+					{
+						"key": "a",
+						"value": "zzzz",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://{{host}}:{{port}}/sample/registerUserFromHeader",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"sample",
+						"registerUserFromHeader"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "注册用户数据来源于cookie",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{host}}:{{port}}/sample/registerUserFromCookie",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"sample",
+						"registerUserFromCookie"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "注册用户数据来源于json path",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{host}}:{{port}}/sample/registerUserFromPath/%7B%0A%20%20%20%20%22userName%22%3A%20%22admin%22%2C%0A%20%20%20%20%22password%22%3A%20%22123456%22%2C%0A%09%22age%22%3A%2099%2C%0A%09%22gender%22%3A%201%2C%0A%09%22workHistory%22%3A%20%7B%22workDescriptions%22%3A%20%5B%22%E4%B8%AD%E5%AD%A6%22%2C%22%E5%A4%A7%E5%AD%A6%22%5D%7D%20%0A%7D",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"sample",
+						"registerUserFromPath",
+						"%7B%0A%20%20%20%20%22userName%22%3A%20%22admin%22%2C%0A%20%20%20%20%22password%22%3A%20%22123456%22%2C%0A%09%22age%22%3A%2099%2C%0A%09%22gender%22%3A%201%2C%0A%09%22workHistory%22%3A%20%7B%22workDescriptions%22%3A%20%5B%22%E4%B8%AD%E5%AD%A6%22%2C%22%E5%A4%A7%E5%AD%A6%22%5D%7D%20%0A%7D"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "取消注册数据来源于query",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{host}}:{{port}}/sample/unRegisterUser?userId=123",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"sample",
+						"unRegisterUser"
+					],
+					"query": [
+						{
+							"key": "userId",
+							"value": "123"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "获取用户信息数据来源于path",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{host}}:{{port}}/sample/getUserInfo/123/1",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"sample",
+						"getUserInfo",
+						"123",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "获取用户信息来源于头与cookie",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "123",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://{{host}}:{{port}}/sample/getUserInfo/byHeaderAndCookie",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"sample",
+						"getUserInfo",
+						"byHeaderAndCookie"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "用户全场景测试",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "gender",
+						"value": "1",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"userName\": \"admin\",\r\n    \"password\": \"123456\",\r\n\t\"age\": 99,\r\n\t\"gender\": 1,\r\n\t\"workHistory\": {\"workDescriptions\": [\"中学\",\"大学\"]} \r\n}"
+				},
+				"url": {
+					"raw": "http://{{host}}:{{port}}/sample/getUserUserInfoAll/123",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"sample",
+						"getUserUserInfoAll",
+						"123"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "下单操作",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\"123\""
+				},
+				"url": {
+					"raw": "http://{{host}}:{{port}}/order/placeOrder",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"order",
+						"placeOrder"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "订单查询",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{host}}:{{port}}/order/getOrder?orderCode=123",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"order",
+						"getOrder"
+					],
+					"query": [
+						{
+							"key": "orderCode",
+							"value": "123"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "x-url注册用户",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "userName",
+							"value": "admin",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "123456",
+							"type": "text"
+						},
+						{
+							"key": "age",
+							"value": "99",
+							"type": "text"
+						},
+						{
+							"key": "gender",
+							"value": "1",
+							"type": "text"
+						},
+						{
+							"key": "workHistory.workDescriptions[0]",
+							"value": "中山",
+							"type": "text"
+						},
+						{
+							"key": "workHistory.workDescriptions[1]",
+							"value": "广州",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://{{host}}:{{port}}/sample/registerUser",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"sample",
+						"registerUser"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "通过query key-value给bean传参",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{host}}:{{port}}/sample/getUserInfoFromQueryParamsParamFormatMap?userName=admin&password=123&age=99&gender=12",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"sample",
+						"getUserInfoFromQueryParamsParamFormatMap"
+					],
+					"query": [
+						{
+							"key": "userName",
+							"value": "admin"
+						},
+						{
+							"key": "password",
+							"value": "123"
+						},
+						{
+							"key": "age",
+							"value": "99"
+						},
+						{
+							"key": "gender",
+							"value": "12"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "通过query json方式传bean参数",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{host}}:{{port}}/sample/getUserInfoFromQueryParamsParamFormatJSON?user=%7B%0A%20%20%20%20%22userName%22%3A%20%22admin%22%2C%0A%20%20%20%20%22password%22%3A%20%22123456%22%2C%0A%09%22age%22%3A%2099%2C%0A%09%22gender%22%3A%201%2C%0A%09%22workHistory%22%3A%20%7B%22workDescriptions%22%3A%20%5B%22%E4%B8%AD%E5%AD%A6%22%2C%22%E5%A4%A7%E5%AD%A6%22%5D%7D%20%0A%7D",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"sample",
+						"getUserInfoFromQueryParamsParamFormatJSON"
+					],
+					"query": [
+						{
+							"key": "user",
+							"value": "%7B%0A%20%20%20%20%22userName%22%3A%20%22admin%22%2C%0A%20%20%20%20%22password%22%3A%20%22123456%22%2C%0A%09%22age%22%3A%2099%2C%0A%09%22gender%22%3A%201%2C%0A%09%22workHistory%22%3A%20%7B%22workDescriptions%22%3A%20%5B%22%E4%B8%AD%E5%AD%A6%22%2C%22%E5%A4%A7%E5%AD%A6%22%5D%7D%20%0A%7D"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "通过path key-value 传bean传参",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{host}}:{{port}}/sample/registerUserFromPathMap/admin/11/1",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"sample",
+						"registerUserFromPathMap",
+						"admin",
+						"11",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "通过header key-value 传bean参数",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userName",
+						"value": "admin",
+						"type": "text"
+					},
+					{
+						"key": "age",
+						"value": "11",
+						"type": "text"
+					},
+					{
+						"key": "gender",
+						"value": "1",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://{{host}}:{{port}}/sample/registerUserFromHeaderMap",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"sample",
+						"registerUserFromHeaderMap"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "port",
+			"value": "8862"
+		},
+		{
+			"key": "host",
+			"value": "127.0.0.1"
+		}
+	]
+}

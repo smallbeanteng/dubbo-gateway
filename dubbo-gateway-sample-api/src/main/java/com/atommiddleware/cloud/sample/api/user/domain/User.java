@@ -2,6 +2,7 @@ package com.atommiddleware.cloud.sample.api.user.domain;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Date;
 
 public class User implements Serializable {
 
@@ -14,6 +15,8 @@ public class User implements Serializable {
 	private Integer age;
 
 	private Short gender;
+	
+	private Date dt;
 
 	private WorkHistory workHistory = new WorkHistory();
 
@@ -55,6 +58,14 @@ public class User implements Serializable {
 
 	public void setWorkHistory(WorkHistory workHistory) {
 		this.workHistory = workHistory;
+	}
+
+	public Date getDt() {
+		return dt;
+	}
+
+	public void setDt(Date dt) {
+		this.dt = dt;
 	}
 
 	@Override

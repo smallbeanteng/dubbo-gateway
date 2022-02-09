@@ -1,18 +1,14 @@
 package com.atommiddleware.cloud.core.annotation;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import org.springframework.http.HttpCookie;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 
 import com.atommiddleware.cloud.core.context.DubboApiContext;
@@ -30,15 +26,13 @@ public abstract class AbstractDubboApiWrapper extends AbstractBaseApiWrapper imp
 			throws InterruptedException, ExecutionException, IllegalAccessException, InvocationTargetException, InstantiationException {
 		ServerHttpRequest serverHttpRequest = exchange.getRequest();
 		final Map<Integer, List<ParamInfo>> mapGroupByParamType = DubboApiContext.MAP_PARAM_INFO.get(pathPattern);
-		final Map<String, String> mapPathParams = new HashMap<String, String>();
+		final Map<String, String> mapPathParams = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		// cookie
 		List<ParamInfo> listParams = mapGroupByParamType.get(ParamFromType.FROM_COOKIE.getParamFromType());
 		if (!CollectionUtils.isEmpty(listParams)) {
-			MultiValueMap<String, HttpCookie> cookies = serverHttpRequest.getCookies();
-			listParams.forEach(o -> {
-				HttpCookie httpCookie = cookies.getFirst(o.getParamName());
-				if (null != httpCookie) {
-					mapPathParams.put(o.getParamName(), httpCookie.getValue());
+			serverHttpRequest.getCookies().forEach((key, values) -> {
+				if (values != null && !values.isEmpty()) {
+					mapPathParams.put(key, values.get(0).getValue());
 				}
 			});
 			convertParam(listParams, mapPathParams, params);
@@ -55,14 +49,8 @@ public abstract class AbstractDubboApiWrapper extends AbstractBaseApiWrapper imp
 		// header
 		listParams = mapGroupByParamType.get(ParamFromType.FROM_HEADER.getParamFromType());
 		if (!CollectionUtils.isEmpty(listParams)) {
-			HttpHeaders httpHeaders = serverHttpRequest.getHeaders();
-			listParams.forEach(o -> {
-				String headerValue = httpHeaders.getFirst(o.getParamName());
-				if (!StringUtils.isEmpty(headerValue)) {
-					mapPathParams.put(o.getParamName(), headerValue);
-				}
-			});
-			convertParam(listParams, mapPathParams, params);
+			mapPathParams.putAll(serverHttpRequest.getHeaders().toSingleValueMap());
+			convertParam(listParams,mapPathParams, params);
 		}
 		// path
 		listParams = mapGroupByParamType.get(ParamFromType.FROM_PATH.getParamFromType());
@@ -75,14 +63,8 @@ public abstract class AbstractDubboApiWrapper extends AbstractBaseApiWrapper imp
 		// queryParams
 		listParams = mapGroupByParamType.get(ParamFromType.FROM_QUERYPARAMS.getParamFromType());
 		if (!CollectionUtils.isEmpty(listParams)) {
-			MultiValueMap<String, String> queryParams = serverHttpRequest.getQueryParams();
-			listParams.forEach(o -> {
-				String queryParam = queryParams.getFirst(o.getParamName());
-				if (!StringUtils.isEmpty(queryParam)) {
-					mapPathParams.put(o.getParamName(), queryParam);
-				}
-			});
-			convertParam(listParams, mapPathParams, params);
+			mapPathParams.putAll(serverHttpRequest.getQueryParams().toSingleValueMap());
+			convertParam(listParams,mapPathParams, params);
 		}
 		// from attribute
 		listParams = mapGroupByParamType.get(ParamFromType.FROM_ATTRIBUTE.getParamFromType());

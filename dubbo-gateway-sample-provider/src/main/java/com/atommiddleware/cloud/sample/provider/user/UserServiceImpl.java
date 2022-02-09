@@ -59,4 +59,34 @@ public class UserServiceImpl implements UserService {
 				user);
 	}
 
+	@Override
+	public Result helloWorld() {
+		return Result.from().setData("say","helloWorld");
+	}
+
+	@Override
+	public Result getUserInfoFromQueryParamsParamFormatMap(User user) {
+		return Result.from().setData("user", user);
+	}
+
+	@Override
+	public Result getUserInfoFromQueryParamsParamFormatJSON(User user) {
+		return Result.from().setData("user", user);
+	}
+
+	@Override
+	public Result registerUserFromCookieMap(User user) {
+		return Result.from().setData("user", user);
+	}
+
+	@Override
+	public Result registerUserFromPathMap(User user) {
+		return Result.from().setData("user", user);
+	}
+
+	@Override
+	public Result registerUserFromHeaderMap(User user) {
+		return Result.from().setData("user", user);
+	}
+
 }

@@ -22,4 +22,10 @@ public @interface ParamAttribute {
 	boolean required() default true;
 	
 	int type();
+	
+	int paramFormat() default 1;
+	
+	public enum ParamFormat {
+		MAP, JSON
+	}
 }

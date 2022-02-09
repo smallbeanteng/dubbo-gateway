@@ -160,32 +160,80 @@ https://github.com/smallbeanteng/dubbo-gateway
 ## 配置示例 ##
     @GateWayDubbo("userService")
     public interface UserService {
-    /**
-	 * 数据来源消息体
+
+	/**
+	 * hello world
+	 * @return hello
+	 */
+	@PathMapping(value="/sample/helloWorld",requestMethod=RequestMethod.GET)
+	Result helloWorld();
+	/**
+	 * 注册用户
+	 * @param user 用户信息
+	 * @return 注册结果
 	 */
 	@PathMapping("/sample/registerUser")
 	Result registerUser(@FromBody User user);
 	/**
-	 * 对象数据源来自header
+	 * 对象数据源来自header,headerName=user,headerValue=json(UrlEncoder后的字符串)
 	 * @param user 用户信息
 	 * @return 结果
 	 */
 	@PathMapping(value="/sample/registerUserFromHeader",requestMethod=RequestMethod.GET)
 	Result registerUserFromHeader(@FromHeader("user") User user);
 	/**
-	 * 对象数据源来自cookie
+	 * header中以key value方式传递对象参数,headerName=headerValue转换为beanPropertyName=beanPropertyValue
+	 * headerName 对应bean 的propertyName,headerValue对应bean的propertyValue
+	 * @param user 用戶信息
+	 * @return 结果
+	 */
+	@PathMapping(value="/sample/registerUserFromHeaderMap",requestMethod=RequestMethod.GET)
+	Result registerUserFromHeaderMap(@FromHeader(value="user",paramFormat = ParamFormatConstants.MAP) User user);
+	/**
+	 * 对象数据源来自cookie,cookieName=user,cookieValue=json(UrlEncoder后的字符串)
 	 * @param user 用户信息
 	 * @return 结果
 	 */
 	@PathMapping(value="/sample/registerUserFromCookie",requestMethod=RequestMethod.GET)
 	Result registerUserFromCookie(@FromCookie("user") User user);
 	/**
-	 * 对象数据源来自path
+	 * cookie中以 key value 方式传递对象参数,cookieName=cookieValue转化为beanPropertyName=beanPropertyValue
+	 * cookieName 对应bean 的propertyName,cookieValue对应bean的propertyValue,不支持嵌套对象转换，嵌套对象或复杂参数请用json
+	 * @param user 用戶信息
+	 * @return 结果
+	 */
+	@PathMapping(value="/sample/registerUserFromCookieMap",requestMethod=RequestMethod.GET)
+	Result registerUserFromCookieMap(@FromCookie(value="user",paramFormat = ParamFormatConstants.MAP) User user);
+	/**
+	 * 对象数据源来自path,{user}=json(UrlEncoder后的字符串)
 	 * @param user 用户信息
 	 * @return 结果
 	 */
 	@PathMapping(value="/sample/registerUserFromPath/{user}",requestMethod=RequestMethod.GET)
 	Result registerUserFromPath(@FromPath("user") User user);
+	/**
+	 * path pattern对应bean的属性名称
+	 * @param user 用户信息
+	 * @return 结果
+	 */
+	@PathMapping(value="/sample/registerUserFromPathMap/{userName}/{age}/{gender}",requestMethod=RequestMethod.GET)
+	Result registerUserFromPathMap(@FromPath(value="user",paramFormat = ParamFormatConstants.MAP) User user);
+
+	/**
+	 * 对象参数来源于query json字符串,user=json(UrlEncoder后的字符串)
+	 * @param user 用户信息
+	 * @return 结果
+	 */
+	@PathMapping(value="/sample/getUserInfoFromQueryParamsParamFormatJSON",requestMethod=RequestMethod.GET)
+	Result getUserInfoFromQueryParamsParamFormatJSON(@FromQueryParams(value="user")User user);
+	
+	/**
+	 * 对象参数来源于query,以key,value方式传参,key对应bean propertyName,value对应propertyValue,嵌套对象或复杂对象请使用JSON
+	 * @param user 用户
+	 * @return 结果
+	 */
+	@PathMapping(value="/sample/getUserInfoFromQueryParamsParamFormatMap",requestMethod=RequestMethod.GET)
+	Result getUserInfoFromQueryParamsParamFormatMap(@FromQueryParams(value="user",paramFormat = ParamFormatConstants.MAP)User user);
 	/**
 	 * 数据来源queryParam
 	 * @param userId 用户id
@@ -195,8 +243,8 @@ https://github.com/smallbeanteng/dubbo-gateway
 	Result unRegisterUser(@FromQueryParams("userId")Long userId);
 	/**
 	 * 数据来源path
-	 * @param userId
-	 * @return
+	 * @param userId 用戶id
+	 * @return 结果
 	 */
 	@PathMapping(value="/sample/getUserInfo/{userId}/{gender}",requestMethod=RequestMethod.GET)
 	Result getUserInfo(@FromPath("userId") Long userId,@FromPath("gender") Short gender);
@@ -204,11 +252,11 @@ https://github.com/smallbeanteng/dubbo-gateway
 	 * 数据来源header 和cookie
 	 * @param userId 用户id
 	 * @param age 年龄
-	 * @return 返回插叙结果
+	 * @return 返回查询结果
 	 */
 	@PathMapping(value="/sample/getUserInfo/byHeaderAndCookie",requestMethod=RequestMethod.GET)
 	Result getUserInfo(@FromHeader("userId")Long userId,@FromCookie("age")Integer age);
-	
+
 	/**
 	 * 全场景
 	 * @param userId 用户id
@@ -220,20 +268,29 @@ https://github.com/smallbeanteng/dubbo-gateway
 	@PathMapping("/sample/getUserUserInfoAll/{userId}")
 	Result getUserUserInfoAll(@FromPath("userId") Long userId,@FromCookie("age")Integer age,@FromHeader("gender")Long gender,@FromBody User user);
     }
+## 样例数据 ##
+    {
+    "userName": "admin",
+    "password": "123456",
+	"age": 99,
+	"gender": 1,
+    "dt": 1644431796892,
+	"workHistory": {"workDescriptions": ["中学","大学"]} 
+    }
 ## 使用步骤 ##
 第一步：按照示例改造api接口，接口需要引入dubbo-gateway-api jar包
 	
       	<dependency>
 			<groupId>com.atommiddleware</groupId>
 			<artifactId>dubbo-gateway-api</artifactId>
-			<version>1.0.7</version>
+			<version>1.0.8</version>
 		</dependency>
 第二步：网关引入改造后的jar包，同时引用以下jar包
 
 	`	<dependency>
 			<groupId>com.atommiddleware</groupId>
 			<artifactId>dubbo-gateway-spring-boot-starter</artifactId>
-			<version>1.0.7</version>
+			<version>1.0.8</version>
 		</dependency>`
 第三步：在启动类上添加要扫描的api包名@DubboGatewayScanner(basePackages = "需扫描的api包名")
 
@@ -251,6 +308,7 @@ https://github.com/smallbeanteng/dubbo-gateway
 - dubbo-gateway-sample-web-provider 基于sevlet类型的dubbo服务提供者示例
 - dubbo-gateway-sample-web-consumer 基于sevlet类型spring mvc的项目接入dubbo-gateway示例
 - dubbo-gateway-sample-zuul 基于spring cloud zuul 接入dubbo-gateway示例
+- dubboGateWay.postman_collection.json 是导出的一份postman自测用例
 ## 配置中心 ##
 按照dubbo的正常接入配置进行配置就好了，以下贴出例子使用的配置在nacos配置中心的配置,其中filters使用了Dubbo作为过滤器
 
@@ -329,6 +387,11 @@ spring cloud zuul类型接口:com.atommiddleware.cloud.core.annotation.ResponseZ
 ## 其它说明 ##
 基于webflux的网关与基于servlet类的web应用接入整合方式是一样的步骤，例子使用的nacos版本2.0.3，如果需要在cookie,header,url,传递复杂参数【非java基本类型】，需先将参数转为json,然后使用UrlEncode进行编码，js中可以使用encodeURIComponent进行编码，默认只支持GET,POST方式接入，ContentType支持application/json，application/x-www-form-urlencoded，复杂参数建议使用application/json,或项目整体都使用application/json
 ## 版本说明 ##
-推荐使用1.0.7版本
+推荐使用1.0.8版本
+
+1.0.8变更如下:
+
+- @FromCookie、@FromPath、@FromHeader、@FromQueryParams新增参数paramFormat以支持key-value格式的传参，简单对象可以不用拼凑成json再使用UrlEncode进行编码传参，不过嵌套对象或复杂对象依然需要按照1.0.7方式进行传参
+- 新增忽略key的大小写，比如原来url传参userName可以写成username这样同样可以获取到参数,json反序列化同样如此
 
     
