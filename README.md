@@ -291,9 +291,9 @@ https://github.com/smallbeanteng/dubbo-gateway
 
 @FromCookie、@FromPath、@FromHeader、@FromQueryParams参数 paramFormat：
 
-- JSON方式 限定参数名称对应的值为json字符串，然后通过反序列化json字符串得到参数对象(如@FromHeader("user") httpHeader应该要有一个头名称为user并且值为【样例数据】的json字符串(UrlEncode))，此将入参看做一个整体json字符串
+- JSON方式 限定参数名称对应的值为json字符串，然后通过反序列化json字符串得到参数对象(如@FromHeader("user") httpHeader应该要有一个头名称为user并且值为【样例数据】的json字符串(UrlEncode))，此将入参看做一个整体json字符串，默认json方式
 - MAP方式 限定对象的propertyName与单个参数一一对应【例如@FromHeader(value="user",paramFormat =ParamFormat.MAP) httpHeader应该要有头名称为userName、password、age、gender、dt等与User对象属性对应的头信息，User将获取这些头信息最终组装成完整对象】,此方式不支持复杂嵌套对象,复杂嵌套对象请使用json
-- 此外如果方法的参数类型本身为基本数据类型，将固定使用Map方式，具体差异可以通过导入postman的测试用例脚本体验
+- 此外如果方法的参数类型本身为基本数据类型，将固定使用Map方式，具体差异可以通过导入postman的测试用例体验
 
 ## 样例数据 ##
     {
