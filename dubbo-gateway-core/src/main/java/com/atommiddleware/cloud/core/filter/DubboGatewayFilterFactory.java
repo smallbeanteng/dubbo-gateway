@@ -8,7 +8,7 @@ import org.springframework.util.PathMatcher;
 import com.atommiddleware.cloud.core.annotation.ResponseReactiveResult;
 import com.atommiddleware.cloud.core.config.DubboReferenceConfigProperties;
 import com.atommiddleware.cloud.core.serialize.Serialization;
-
+@Deprecated
 public class DubboGatewayFilterFactory extends AbstractGatewayFilterFactory<DubboGatewayFilterFactory.Config> {
 
 	private final DubboGatewayFilter dubboGatewayFilter;

@@ -1,8 +1,11 @@
 package com.atommiddleware.cloud.core.annotation;
 
+import com.atommiddleware.cloud.api.annotation.ParamAttribute.ParamFormat;
+import com.atommiddleware.cloud.api.annotation.ParamAttribute.ParamFromType;
+
 public class ParamInfo {
 	
-	public ParamInfo(int index,String paramName,int paramFromType,String paramType,int paramFormat, boolean simpleType,boolean childAllSimpleType,boolean required) {
+	public ParamInfo(int index,String paramName,ParamFromType paramFromType,String paramType,ParamFormat paramFormat, boolean simpleType,boolean childAllSimpleType,boolean required) {
 		this.index=index;
 		this.paramName=paramName;
 		this.paramFromType=paramFromType;
@@ -17,7 +20,7 @@ public class ParamInfo {
 	
 	private String paramName;
 	
-	private int paramFromType;
+	private ParamFromType paramFromType;
 	
 	private String paramType;
 	
@@ -27,7 +30,7 @@ public class ParamInfo {
 	
 	private boolean required;
 	
-	private int paramFormat;
+	private ParamFormat paramFormat;
 	
 	public int getIndex() {
 		return index;
@@ -45,11 +48,11 @@ public class ParamInfo {
 		this.paramName = paramName;
 	}
 
-	public int getParamFromType() {
+	public ParamFromType getParamFromType() {
 		return paramFromType;
 	}
 
-	public void setParamFromType(int paramFromType) {
+	public void setParamFromType(ParamFromType paramFromType) {
 		this.paramFromType = paramFromType;
 	}
 
@@ -85,11 +88,11 @@ public class ParamInfo {
 		this.required = required;
 	}
 
-	public int getParamFormat() {
+	public ParamFormat getParamFormat() {
 		return paramFormat;
 	}
 
-	public void setParamFormat(int paramFormat) {
+	public void setParamFormat(ParamFormat paramFormat) {
 		this.paramFormat = paramFormat;
 	}
 }

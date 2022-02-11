@@ -8,10 +8,13 @@ import java.lang.annotation.Target;
 
 import org.springframework.core.annotation.AliasFor;
 
+import com.atommiddleware.cloud.api.annotation.ParamAttribute.ParamFormat;
+import com.atommiddleware.cloud.api.annotation.ParamAttribute.ParamFromType;
+
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@ParamAttribute(type = 3)
+@ParamAttribute(paramFromType = ParamFromType.FROM_HEADER)
 public @interface FromHeader {
 
 	@AliasFor(annotation = ParamAttribute.class)
@@ -24,5 +27,5 @@ public @interface FromHeader {
 	boolean required() default true;
 	
 	@AliasFor(annotation = ParamAttribute.class)
-	int paramFormat() default 1;
+	ParamFormat paramFormat() default ParamFormat.JSON;
 }

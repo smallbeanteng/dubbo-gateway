@@ -38,8 +38,8 @@ public class DubboGatewayServletAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public ResponseServletResult responseResult(DubboReferenceConfigProperties dubboReferenceConfigProperties) {
-		return new DefaultResponseServletResult(dubboReferenceConfigProperties);
+	public ResponseServletResult responseResult(DubboReferenceConfigProperties dubboReferenceConfigProperties,Serialization serialization) {
+		return new DefaultResponseServletResult(dubboReferenceConfigProperties,serialization);
 	}
 
 	@Bean
@@ -49,8 +49,10 @@ public class DubboGatewayServletAutoConfiguration {
 			Serialization serialization, ResponseServletResult responseResult) {
 		FilterRegistrationBean registration = new FilterRegistrationBean();
 		registration.setFilter(
-				new DubboServletFilter(pathMatcher, serialization, dubboReferenceConfigProperties, responseResult));
-		registration.addUrlPatterns(dubboReferenceConfigProperties.getFilterUrlPatterns());
+				new DubboServletFilter(pathMatcher, serialization, dubboReferenceConfigProperties.getFilterOrder(), responseResult,dubboReferenceConfigProperties.getExcludUrlPatterns()));
+		if(null!=dubboReferenceConfigProperties.getIncludUrlPatterns()&&dubboReferenceConfigProperties.getIncludUrlPatterns().length>0) {
+		registration.addUrlPatterns(dubboReferenceConfigProperties.getIncludUrlPatterns());
+		}
 		registration.setName("dubboGatewayFilter");
 		registration.setOrder(dubboReferenceConfigProperties.getFilterOrder());
 		return registration;

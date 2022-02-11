@@ -21,11 +21,14 @@ public @interface ParamAttribute {
 	
 	boolean required() default true;
 	
-	int type();
+	ParamFromType paramFromType();
 	
-	int paramFormat() default 1;
+	ParamFormat paramFormat() default ParamFormat.JSON;
 	
 	public enum ParamFormat {
 		MAP, JSON
+	}
+	public enum ParamFromType {
+		FROM_BODY, FROM_COOKIE, FROM_HEADER, FROM_PATH, FROM_ATTRIBUTE, FROM_QUERYPARAMS;
 	}
 }

@@ -10,9 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 
-import com.atommiddleware.cloud.core.annotation.DefaultResponseServletResult;
 import com.atommiddleware.cloud.core.annotation.DefaultResponseZuulServletResult;
-import com.atommiddleware.cloud.core.annotation.ResponseServletResult;
 import com.atommiddleware.cloud.core.annotation.ResponseZuulServletResult;
 import com.atommiddleware.cloud.core.config.DubboReferenceConfigProperties;
 import com.atommiddleware.cloud.core.filter.DubboServletZuulFilter;
@@ -38,25 +36,18 @@ public class DubboGatewayZuulServletAutoConfiguration {
 	public PathMatcher pathMatcher() {
 		return new AntPathMatcher();
 	}
-
-	@Bean
-	@ConditionalOnMissingBean
-	public ResponseServletResult responseResult(DubboReferenceConfigProperties dubboReferenceConfigProperties) {
-		return new DefaultResponseServletResult(dubboReferenceConfigProperties);
-	}
-
+ 
 	@Bean
 	@ConditionalOnMissingBean
 	public ResponseZuulServletResult responseZuulServletResult(
-			DubboReferenceConfigProperties dubboReferenceConfigProperties) {
-		return new DefaultResponseZuulServletResult(dubboReferenceConfigProperties);
+			DubboReferenceConfigProperties dubboReferenceConfigProperties,Serialization serialization) {
+		return new DefaultResponseZuulServletResult(dubboReferenceConfigProperties,serialization);
 	}
 
 	@Bean
 	@ConditionalOnMissingBean
-	public DubboServletZuulFilter dubboServletZuulFilter(DubboReferenceConfigProperties dubboReferenceConfigProperties,
-			PathMatcher pathMatcher, Serialization serialization, ResponseZuulServletResult responseZuulServletResult) {
-		return new DubboServletZuulFilter(pathMatcher, serialization, dubboReferenceConfigProperties,
+	public DubboServletZuulFilter dubboServletZuulFilter(PathMatcher pathMatcher, Serialization serialization, ResponseZuulServletResult responseZuulServletResult) {
+		return new DubboServletZuulFilter(pathMatcher, serialization,
 				responseZuulServletResult);
 	}
 }

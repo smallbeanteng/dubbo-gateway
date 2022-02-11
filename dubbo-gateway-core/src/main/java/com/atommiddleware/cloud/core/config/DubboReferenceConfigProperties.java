@@ -3,6 +3,7 @@ package com.atommiddleware.cloud.core.config;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.Ordered;
 
@@ -13,9 +14,29 @@ public class DubboReferenceConfigProperties {
 	
 	private int filterOrder=Ordered.LOWEST_PRECEDENCE;
 	
-	private String filterUrlPatterns="/*";
-	
 	private Map<String,DubboReferenceConfig> dubboRefer=new HashMap<String, DubboReferenceConfig>();
+
+	@Value("${includUrlPatterns:#{null}}")
+	private String[] includUrlPatterns;
+	
+	@Value("${excludUrlPatterns:#{null}}")
+	private String[] excludUrlPatterns;
+	
+	public String[] getIncludUrlPatterns() {
+		return includUrlPatterns;
+	}
+
+	public void setIncludUrlPatterns(String[] includUrlPatterns) {
+		this.includUrlPatterns = includUrlPatterns;
+	}
+
+	public String[] getExcludUrlPatterns() {
+		return excludUrlPatterns;
+	}
+
+	public void setExcludUrlPatterns(String[] excludUrlPatterns) {
+		this.excludUrlPatterns = excludUrlPatterns;
+	}
 
 	public String getCharset() {
 		return charset;
@@ -31,14 +52,6 @@ public class DubboReferenceConfigProperties {
 
 	public void setFilterOrder(int filterOrder) {
 		this.filterOrder = filterOrder;
-	}
-
-	public String getFilterUrlPatterns() {
-		return filterUrlPatterns;
-	}
-
-	public void setFilterUrlPatterns(String filterUrlPatterns) {
-		this.filterUrlPatterns = filterUrlPatterns;
 	}
 
 	public Map<String, DubboReferenceConfig> getDubboRefer() {

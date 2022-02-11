@@ -115,7 +115,7 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper {
 				param = ClassUtils.convertPrimitive(paramTypeClass, paramValue);
 				}
 			}else {
-				if(paramInfo.getParamFormat()==ParamFormat.MAP.ordinal()) {
+				if(paramInfo.getParamFormat()==ParamFormat.MAP) {
 					param= serialization.convertValue(mapPathParams, paramTypeClass);
 				}else {
 					paramValue = mapPathParams.get(paramInfo.getParamName());

@@ -22,8 +22,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.atommiddleware.cloud.api.annotation.ParamAttribute;
+import com.atommiddleware.cloud.api.annotation.ParamAttribute.ParamFromType;
 import com.atommiddleware.cloud.api.annotation.PathMapping;
-import com.atommiddleware.cloud.core.annotation.BaseApiWrapper.ParamFromType;
 import com.atommiddleware.cloud.core.config.DubboReferenceConfig;
 import com.atommiddleware.cloud.core.config.DubboReferenceConfigProperties;
 import com.atommiddleware.cloud.core.context.DubboApiContext;
@@ -65,7 +65,7 @@ public class DefaultDubboApiWrapperFactory extends AbstractDubboApiWrapperFactor
 			throws CannotCompileException, NotFoundException, IllegalArgumentException, IllegalAccessException,
 			IOException {
 		final Map<String, Class<?>> mapClasses = DubboApiContext.MAP_CLASSES;
-		final Map<String, Map<Integer, List<ParamInfo>>> mapParamInfo = DubboApiContext.MAP_PARAM_INFO;
+		final Map<String, Map<ParamFromType, List<ParamInfo>>> mapParamInfo = DubboApiContext.MAP_PARAM_INFO;
 		List<PathMappingMethodInfo> listPathMappingMethodInfo = new ArrayList<PathMappingMethodInfo>();
 		Arrays.stream(interfaceClass.getMethods()).forEach(o -> {
 			PathMapping pathMapping = AnnotationUtils.findAnnotation(o, PathMapping.class);
@@ -91,7 +91,7 @@ public class DefaultDubboApiWrapperFactory extends AbstractDubboApiWrapperFactor
 						if (null != an) {
 							if (null == strParamNames) {
 								if (StringUtils.isEmpty(an.name())
-										&& an.type() != ParamFromType.FROM_BODY.getParamFromType()) {
+										&& an.paramFromType() != ParamFromType.FROM_BODY) {
 									throw new IllegalArgumentException("ParamAttribute verification exception");
 								}
 							}
@@ -131,7 +131,7 @@ public class DefaultDubboApiWrapperFactory extends AbstractDubboApiWrapperFactor
 							pathMappingMethodInfo
 									.getListParamMeta().add(
 											new ParamMeta(
-													an.type() == ParamFromType.FROM_BODY.getParamFromType() ? ""
+													an.paramFromType() == ParamFromType.FROM_BODY ? ""
 															: StringUtils.isEmpty(an.name()) ? strParamNames[i]
 																	: an.name(),
 													typeParameters[i].getName(), an, isSimpleType,
@@ -200,7 +200,7 @@ public class DefaultDubboApiWrapperFactory extends AbstractDubboApiWrapperFactor
 					int i = 0;
 					ParamInfo paramInfo;
 					for (ParamMeta paramMeta : pathMappingMethodInfo.getListParamMeta()) {
-						paramInfo = new ParamInfo(i, paramMeta.getParamName(), paramMeta.getParamAttribute().type(),
+						paramInfo = new ParamInfo(i, paramMeta.getParamName(), paramMeta.getParamAttribute().paramFromType(),
 								paramMeta.getParamType(),paramMeta.getParamAttribute().paramFormat(),paramMeta.isSimpleType(), paramMeta.isChildAllSimpleType(),
 								paramMeta.getParamAttribute().required());
 						listParamInfo.add(paramInfo);

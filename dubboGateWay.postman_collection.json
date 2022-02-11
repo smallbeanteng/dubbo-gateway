@@ -351,7 +351,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://{{host}}:{{port}}/sample/getUserInfoFromQueryParamsParamFormatMap?userName=admin&password=123&age=99&gender=12",
+					"raw": "http://{{host}}:{{port}}/sample/getUserInfoFromQueryParamsParamFormatMap?username=admin&password=123&age=99&gender=12",
 					"protocol": "http",
 					"host": [
 						"{{host}}"
@@ -363,7 +363,7 @@
 					],
 					"query": [
 						{
-							"key": "userName",
+							"key": "username",
 							"value": "admin"
 						},
 						{
@@ -463,6 +463,98 @@
 					"path": [
 						"sample",
 						"registerUserFromHeaderMap"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "请求返回值为空 参数为空 get请求",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{host}}:{{port}}/sample/helloVoid",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"sample",
+						"helloVoid"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "请求值返回值为空post",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://{{host}}:{{port}}/sample/helloVoidPost",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"sample",
+						"helloVoidPost"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "参数为空，有返回值post",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://{{host}}:{{port}}/sample/helloWorldPost",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"sample",
+						"helloWorldPost"
 					]
 				}
 			},

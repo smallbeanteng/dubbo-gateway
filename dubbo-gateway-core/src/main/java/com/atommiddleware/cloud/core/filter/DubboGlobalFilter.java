@@ -1,15 +1,18 @@
 package com.atommiddleware.cloud.core.filter;
 
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.CACHED_REQUEST_BODY_ATTR;
+import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.GATEWAY_REQUEST_URL_ATTR;
+import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.GATEWAY_SCHEME_PREFIX_ATTR;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.http.HttpStatus;
-import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.cloud.gateway.support.NotFoundException;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -35,38 +38,41 @@ import com.atommiddleware.cloud.core.serialize.Serialization;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-@Deprecated
 @Slf4j
-public class DubboGatewayFilter implements GatewayFilter, Ordered {
+public class DubboGlobalFilter implements GlobalFilter, Ordered{
+
 	private final PathMatcher pathMatcher;
 	private final Serialization serialization;
 	private final DubboReferenceConfigProperties dubboReferenceConfigProperties;
 	private final ResponseReactiveResult responseResult;
-	private final int order;
 	private ServerCodecConfigurer serverCodecConfigurer;
 	private final List<MediaType> supportedTypes=new ArrayList<MediaType>();
-	public DubboGatewayFilter(PathMatcher pathMatcher, Serialization serialization,
+	public DubboGlobalFilter(PathMatcher pathMatcher, Serialization serialization,
 			DubboReferenceConfigProperties dubboReferenceConfigProperties, ServerCodecConfigurer serverCodecConfigurer,
 			ResponseReactiveResult responseResult) {
 		this.pathMatcher = pathMatcher;
 		this.serialization = serialization;
 		this.dubboReferenceConfigProperties = dubboReferenceConfigProperties;
-		this.order = dubboReferenceConfigProperties.getFilterOrder();
 		this.serverCodecConfigurer = serverCodecConfigurer;
 		this.responseResult = responseResult;
 		supportedTypes.add(MediaType.APPLICATION_JSON);
 		supportedTypes.add(MediaType.APPLICATION_JSON_UTF8);
 		supportedTypes.add(MediaType.APPLICATION_FORM_URLENCODED);
 	}
-
+	
 	@Override
 	public int getOrder() {
-		return this.order;
+		return 10151;
 	}
 
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+		URI url = exchange.getAttribute(GATEWAY_REQUEST_URL_ATTR);
+		String schemePrefix = exchange.getAttribute(GATEWAY_SCHEME_PREFIX_ATTR);
+		if (url == null
+				|| (!"dubbo".equals(url.getScheme()) && !"dubbo".equals(schemePrefix))) {
+			return chain.filter(exchange);
+		}
 		String path = exchange.getRequest().getPath().value();
 		String pathPatternTemp = path;
 		DubboApiWrapper dubboApiWrapperTemp = DubboApiContext.MAP_DUBBO_API_WRAPPER.get(path);

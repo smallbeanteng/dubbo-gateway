@@ -89,4 +89,19 @@ public class UserServiceImpl implements UserService {
 		return Result.from().setData("user", user);
 	}
 
+	@Override
+	public void helloVoid() {
+		 System.out.println("void");
+	}
+
+	@Override
+	public Result helloWorldPost() {
+		return Result.from().setData("say","helloWorld post");
+	}
+
+	@Override
+	public void helloVoidPost() {
+		 System.out.println("post void");
+	}
+
 }

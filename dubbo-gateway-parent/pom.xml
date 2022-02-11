@@ -51,7 +51,7 @@
 	<description>The dubbo-gateway parent module of dubbo-gateway</description>
 	<url>https://github.com/smallbeanteng/dubbo-gateway</url>
 	<properties>
-		<revision>1.0.8</revision>
+		<revision>1.0.9</revision>
 		<maven_flatten_version>1.2.5</maven_flatten_version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>

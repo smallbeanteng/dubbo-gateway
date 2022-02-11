@@ -6,7 +6,7 @@ import com.atommiddleware.cloud.api.annotation.FromHeader;
 import com.atommiddleware.cloud.api.annotation.FromPath;
 import com.atommiddleware.cloud.api.annotation.FromQueryParams;
 import com.atommiddleware.cloud.api.annotation.GateWayDubbo;
-import com.atommiddleware.cloud.api.annotation.ParamFormatConstants;
+import com.atommiddleware.cloud.api.annotation.ParamAttribute.ParamFormat;
 import com.atommiddleware.cloud.api.annotation.PathMapping;
 import com.atommiddleware.cloud.api.annotation.PathMapping.RequestMethod;
 import com.atommiddleware.cloud.sample.api.Result;
@@ -20,6 +20,22 @@ public interface UserService {
 	 */
 	@PathMapping(value="/sample/helloWorld",requestMethod=RequestMethod.GET)
 	Result helloWorld();
+	/**
+	 * 参数为空post请求
+	 * @return 结果
+	 */
+	@PathMapping(value="/sample/helloWorldPost",requestMethod=RequestMethod.POST)
+	Result helloWorldPost();
+	/**
+	 * 返回值为空
+	 */
+	@PathMapping(value="/sample/helloVoid",requestMethod=RequestMethod.GET)
+	void helloVoid();
+	/**
+	 * 返回值为空 post请求
+	 */
+	@PathMapping(value="/sample/helloVoidPost",requestMethod=RequestMethod.POST)
+	void helloVoidPost();
 	/**
 	 * 注册用户
 	 * @param user 用户信息
@@ -41,7 +57,7 @@ public interface UserService {
 	 * @return 结果
 	 */
 	@PathMapping(value="/sample/registerUserFromHeaderMap",requestMethod=RequestMethod.GET)
-	Result registerUserFromHeaderMap(@FromHeader(value="user",paramFormat = ParamFormatConstants.MAP) User user);
+	Result registerUserFromHeaderMap(@FromHeader(value="user",paramFormat =ParamFormat.MAP) User user);
 	/**
 	 * 对象数据源来自cookie,cookieName=user,cookieValue=json(UrlEncoder后的字符串)
 	 * @param user 用户信息
@@ -56,7 +72,7 @@ public interface UserService {
 	 * @return 结果
 	 */
 	@PathMapping(value="/sample/registerUserFromCookieMap",requestMethod=RequestMethod.GET)
-	Result registerUserFromCookieMap(@FromCookie(value="user",paramFormat = ParamFormatConstants.MAP) User user);
+	Result registerUserFromCookieMap(@FromCookie(value="user",paramFormat = ParamFormat.MAP) User user);
 	/**
 	 * 对象数据源来自path,{user}=json(UrlEncoder后的字符串)
 	 * @param user 用户信息
@@ -70,7 +86,7 @@ public interface UserService {
 	 * @return 结果
 	 */
 	@PathMapping(value="/sample/registerUserFromPathMap/{userName}/{age}/{gender}",requestMethod=RequestMethod.GET)
-	Result registerUserFromPathMap(@FromPath(value="user",paramFormat = ParamFormatConstants.MAP) User user);
+	Result registerUserFromPathMap(@FromPath(value="user",paramFormat = ParamFormat.MAP) User user);
 
 	/**
 	 * 对象参数来源于query json字符串,user=json(UrlEncoder后的字符串)
@@ -86,7 +102,7 @@ public interface UserService {
 	 * @return 结果
 	 */
 	@PathMapping(value="/sample/getUserInfoFromQueryParamsParamFormatMap",requestMethod=RequestMethod.GET)
-	Result getUserInfoFromQueryParamsParamFormatMap(@FromQueryParams(value="user",paramFormat = ParamFormatConstants.MAP)User user);
+	Result getUserInfoFromQueryParamsParamFormatMap(@FromQueryParams(value="user",paramFormat = ParamFormat.MAP)User user);
 	/**
 	 * 数据来源queryParam
 	 * @param userId 用户id

@@ -1,8 +1,11 @@
 package com.atommiddleware.cloud.core.annotation;
 
 import java.io.IOException;
+
 import org.springframework.boot.WebApplicationType;
+
 import com.atommiddleware.cloud.core.config.DubboReferenceConfigProperties;
+
 import javassist.CannotCompileException;
 import javassist.NotFoundException;
 

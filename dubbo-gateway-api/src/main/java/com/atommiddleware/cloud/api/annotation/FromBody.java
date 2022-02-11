@@ -8,10 +8,12 @@ import java.lang.annotation.Target;
 
 import org.springframework.core.annotation.AliasFor;
 
+import com.atommiddleware.cloud.api.annotation.ParamAttribute.ParamFromType;
+
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@ParamAttribute(type = 1)
+@ParamAttribute(paramFromType = ParamFromType.FROM_BODY)
 public @interface FromBody {
 	
 	@AliasFor(annotation = ParamAttribute.class)
