@@ -18,7 +18,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-			<dubbo.gateway.version>1.0.9</dubbo.gateway.version>
+			<dubbo.gateway.version>1.1.1</dubbo.gateway.version>
 	</properties>
 
 	<dependencies>

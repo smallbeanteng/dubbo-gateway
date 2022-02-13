@@ -3,10 +3,10 @@ package com.atommiddleware.cloud.core.annotation;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 
 import com.atommiddleware.cloud.core.config.DubboReferenceConfigProperties;
@@ -31,14 +31,9 @@ public class DefaultResponseZuulServletResult implements ResponseZuulServletResu
 		// zuul 网关直接返回响应，不让请求访问后续的接口
 		ctx.setSendZuulResponse(false);
 		HttpServletResponse httpServletResponse=ctx.getResponse();
-		HttpServletRequest httpServletRequest=ctx.getRequest();
 		httpServletResponse.setCharacterEncoding(dubboReferenceConfigProperties.getCharset());
-		httpServletResponse.setHeader("Access-Control-Allow-Credentials", "true");
-		httpServletResponse.setHeader("Access-Control-Allow-Methods", "GET,POST");
-		httpServletResponse.setHeader("Access-Control-Allow-Origin",
-				httpServletRequest.getHeader("Access-Control-Allow-Origin"));
 		httpServletResponse.setStatus(HttpServletResponse.SC_OK);
-		httpServletResponse.setContentType("application/json");
+		httpServletResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
 		try {
 			if(StringUtils.isEmpty(result)) {
             	result="";
@@ -55,15 +50,9 @@ public class DefaultResponseZuulServletResult implements ResponseZuulServletResu
 		RequestContext ctx = RequestContext.getCurrentContext();
 		ctx.setSendZuulResponse(false);
 		HttpServletResponse httpServletResponse=ctx.getResponse();
-		HttpServletRequest httpServletRequest=ctx.getRequest();
 		httpServletResponse.setCharacterEncoding(dubboReferenceConfigProperties.getCharset());
-		httpServletResponse.setHeader("Access-Control-Allow-Credentials", "true");
-		httpServletResponse.setHeader("Access-Control-Allow-Methods", "GET,POST");
-		httpServletResponse.setHeader("Access-Control-Allow-Origin",
-				httpServletRequest.getHeader("Access-Control-Allow-Origin"));
-		
 		httpServletResponse.setStatus(httpStatus.value());
-		httpServletResponse.setContentType("application/json");
+		httpServletResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
         Map<String, Object> map = new HashMap<>();
         map.put("code",httpStatus.value());
         map.put("msg",StringUtils.isEmpty(msg)?httpStatus.getReasonPhrase():msg);  

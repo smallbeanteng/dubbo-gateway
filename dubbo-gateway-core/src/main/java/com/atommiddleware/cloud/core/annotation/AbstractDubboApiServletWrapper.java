@@ -1,5 +1,6 @@
 package com.atommiddleware.cloud.core.annotation;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -19,6 +20,8 @@ import com.atommiddleware.cloud.api.annotation.ParamAttribute.ParamFromType;
 import com.atommiddleware.cloud.core.context.DubboApiContext;
 import com.atommiddleware.cloud.core.utils.HttpUtils;
 
+import lombok.extern.slf4j.Slf4j;
+@Slf4j
 public abstract class AbstractDubboApiServletWrapper extends AbstractBaseApiWrapper implements DubboApiServletWrapper{
 
 	@Override
@@ -26,6 +29,16 @@ public abstract class AbstractDubboApiServletWrapper extends AbstractBaseApiWrap
 		  throw new UnsupportedOperationException();
 	}
 	
+	private String decodeUrlEncode(String value) {
+		if (!StringUtils.isEmpty(value)) {
+			try {
+				value=java.net.URLDecoder.decode(value, DubboApiContext.CHARSET);
+			} catch (UnsupportedEncodingException e) {
+				log.error("decode fail", e);
+			}
+		}
+		return value;
+	}
 	protected void handlerConvertParams(String pathPattern, HttpServletRequest httpServletRequest, Object[] params, Object body) throws InterruptedException, ExecutionException, IllegalAccessException, InvocationTargetException, InstantiationException {
 		final Map<ParamFromType, List<ParamInfo>> mapGroupByParamType = DubboApiContext.MAP_PARAM_INFO.get(pathPattern);
 		final Map<String, String> mapPathParams = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
@@ -34,7 +47,7 @@ public abstract class AbstractDubboApiServletWrapper extends AbstractBaseApiWrap
 		if (!CollectionUtils.isEmpty(listParams)) {
 			Cookie[] cookies = httpServletRequest.getCookies();
 			Arrays.stream(cookies).forEach(o -> {
-				mapPathParams.put(o.getName(), o.getValue());
+				mapPathParams.put(o.getName(), decodeUrlEncode(o.getValue()));
 			});
 			convertParam(listParams, mapPathParams, params);
 		}
@@ -56,7 +69,7 @@ public abstract class AbstractDubboApiServletWrapper extends AbstractBaseApiWrap
 		    	  headerName=enumHeaderNames.nextElement();
 		    	  headerValue = httpServletRequest.getHeader(headerName);
 		    	  if (!StringUtils.isEmpty(headerValue)) {
-		    		mapPathParams.put(headerName.toLowerCase(),headerValue);
+		    		mapPathParams.put(headerName,decodeUrlEncode(headerValue));
 		    	  }
 		      }
 			convertParam(listParams, mapPathParams, params);
@@ -65,8 +78,9 @@ public abstract class AbstractDubboApiServletWrapper extends AbstractBaseApiWrap
 		// path
 		listParams = mapGroupByParamType.get(ParamFromType.FROM_PATH);
 		if (!CollectionUtils.isEmpty(listParams)) {
-			mapPathParams
-					.putAll(pathMatcher.extractUriTemplateVariables(pathPattern, httpServletRequest.getRequestURI()));
+			pathMatcher.extractUriTemplateVariables(pathPattern, httpServletRequest.getRequestURI()).forEach((key,value)->{
+				mapPathParams.put(key, decodeUrlEncode(value));
+			});
 			convertParam(listParams, mapPathParams, params);
 		}
 		// queryParams

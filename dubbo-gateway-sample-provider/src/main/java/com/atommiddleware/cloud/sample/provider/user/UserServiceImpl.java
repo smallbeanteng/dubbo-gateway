@@ -17,24 +17,25 @@ public class UserServiceImpl implements UserService {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		if(time%9==0) {
 		System.out.println(user);
-		}
 		return Result.from().setData("user", user);
 	}
 
 	@Override
 	public Result registerUserFromHeader(User user) {
+		System.out.println(user);
 		return Result.from().setData("user", user);
 	}
 
 	@Override
 	public Result registerUserFromCookie(User user) {
+		System.out.println(user);
 		return Result.from().setData("user", user);
 	}
 
 	@Override
 	public Result registerUserFromPath(User user) {
+		System.out.println(user);
 		return Result.from().setData("user", user);
 	}
 
@@ -55,6 +56,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Result getUserUserInfoAll(Long userId, Integer age, Long gender, User user) {
+		System.out.println(user);
 		return Result.from().setData("userId", userId).setData("age", age).setData("gender", gender).setData("user",
 				user);
 	}
@@ -66,26 +68,31 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Result getUserInfoFromQueryParamsParamFormatMap(User user) {
+		System.out.println(user);
 		return Result.from().setData("user", user);
 	}
 
 	@Override
 	public Result getUserInfoFromQueryParamsParamFormatJSON(User user) {
+		System.out.println(user);
 		return Result.from().setData("user", user);
 	}
 
 	@Override
 	public Result registerUserFromCookieMap(User user) {
+		System.out.println(user);
 		return Result.from().setData("user", user);
 	}
 
 	@Override
 	public Result registerUserFromPathMap(User user) {
+		System.out.println(user);
 		return Result.from().setData("user", user);
 	}
 
 	@Override
 	public Result registerUserFromHeaderMap(User user) {
+		System.out.println(user);
 		return Result.from().setData("user", user);
 	}
 

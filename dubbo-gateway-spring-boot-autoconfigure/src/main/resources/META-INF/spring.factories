@@ -1,4 +1,5 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.atommiddleware.cloud.autoconfigure.DubboGatewayCommonAutoConfiguration,\
 com.atommiddleware.cloud.autoconfigure.DubboGatewayAutoConfiguration,\
 com.atommiddleware.cloud.autoconfigure.ExceptionHandlerConfiguration,\
 com.atommiddleware.cloud.autoconfigure.DubboGatewayServletAutoConfiguration,\

@@ -50,5 +50,17 @@
 			<artifactId>spring-cloud-starter-netflix-zuul</artifactId>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>org.owasp.antisamy</groupId>
+			<artifactId>antisamy</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.owasp.encoder</groupId>
+			<artifactId>encoder-esapi</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.owasp.esapi</groupId>
+			<artifactId>esapi</artifactId>
+		</dependency>
 	</dependencies>
 </project>

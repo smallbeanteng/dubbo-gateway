@@ -14,19 +14,15 @@ import reactor.core.publisher.Mono;
 public class DefaultResponseResult implements ResponseReactiveResult {
 
 	public DefaultResponseResult(DubboReferenceConfigProperties dubboReferenceConfigProperties) {
-	
+
 	}
 
 	@Override
 	public Mono<Void> reactiveFluxResponse(ServerWebExchange exchange, ServerHttpResponse response,
 			Flux<DataBuffer> strDataBuffer) {
-		response.getHeaders().add("Access-Control-Allow-Credentials", "true");
-		response.getHeaders().add("Access-Control-Allow-Methods", "GET,POST");
-		response.getHeaders().add("Access-Control-Allow-Origin",
-				exchange.getRequest().getHeaders().getFirst("Access-Control-Allow-Origin"));
-		response.getHeaders().setContentType(MediaType.APPLICATION_STREAM_JSON);
-			response.setStatusCode(HttpStatus.OK);
-			return response.writeWith(strDataBuffer);
+		response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+		response.setStatusCode(HttpStatus.OK);
+		return response.writeWith(strDataBuffer);
 	}
 
 }

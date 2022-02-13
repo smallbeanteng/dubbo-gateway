@@ -11,4 +11,10 @@ spring:
 logging:
   path: /mnt/logs
 
-       
+com:
+  atommiddleware:
+    cloud:
+      config:
+        securityConfig:
+          xssFilterStrategy: 0
+          xssFilterType: 0       

@@ -1,5 +1,6 @@
 package com.atommiddleware.cloud.core.annotation;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 
 import com.atommiddleware.cloud.api.annotation.ParamAttribute.ParamFromType;
@@ -23,6 +25,16 @@ public abstract class AbstractDubboApiWrapper extends AbstractBaseApiWrapper imp
 	public CompletableFuture handler(String pathPattern, ServerWebExchange exchange,Object body) {
 		throw new UnsupportedOperationException();
 	}
+	private String decodeUrlEncode(String value) {
+		if (!StringUtils.isEmpty(value)) {
+			try {
+				  value=java.net.URLDecoder.decode(value, DubboApiContext.CHARSET);
+			} catch (UnsupportedEncodingException e) {
+				log.error("decode fail", e);
+			}
+		}
+		return value;
+	}
 	protected void handlerConvertParams(String pathPattern, ServerWebExchange exchange, Object[] params, Object body)
 			throws InterruptedException, ExecutionException, IllegalAccessException, InvocationTargetException, InstantiationException {
 		ServerHttpRequest serverHttpRequest = exchange.getRequest();
@@ -33,7 +45,7 @@ public abstract class AbstractDubboApiWrapper extends AbstractBaseApiWrapper imp
 		if (!CollectionUtils.isEmpty(listParams)) {
 			serverHttpRequest.getCookies().forEach((key, values) -> {
 				if (values != null && !values.isEmpty()) {
-					mapPathParams.put(key, values.get(0).getValue());
+					mapPathParams.put(key, decodeUrlEncode(values.get(0).getValue()));
 				}
 			});
 			convertParam(listParams, mapPathParams, params);
@@ -50,21 +62,26 @@ public abstract class AbstractDubboApiWrapper extends AbstractBaseApiWrapper imp
 		// header
 		listParams = mapGroupByParamType.get(ParamFromType.FROM_HEADER);
 		if (!CollectionUtils.isEmpty(listParams)) {
-			mapPathParams.putAll(serverHttpRequest.getHeaders().toSingleValueMap());
+			serverHttpRequest.getHeaders().toSingleValueMap().forEach((key,value)->{
+				mapPathParams.put(key, decodeUrlEncode(value));
+			});
 			convertParam(listParams,mapPathParams, params);
 		}
 		// path
 		listParams = mapGroupByParamType.get(ParamFromType.FROM_PATH);
 		if (!CollectionUtils.isEmpty(listParams)) {
-			mapPathParams
-					.putAll(pathMatcher.extractUriTemplateVariables(pathPattern, serverHttpRequest.getPath().value()));
+			pathMatcher.extractUriTemplateVariables(pathPattern, serverHttpRequest.getPath().value()).forEach((key,value)->{
+				mapPathParams.put(key, decodeUrlEncode(value));
+			});
 			convertParam(listParams, mapPathParams, params);
 		}
 		
 		// queryParams
 		listParams = mapGroupByParamType.get(ParamFromType.FROM_QUERYPARAMS);
 		if (!CollectionUtils.isEmpty(listParams)) {
-			mapPathParams.putAll(serverHttpRequest.getQueryParams().toSingleValueMap());
+			serverHttpRequest.getQueryParams().toSingleValueMap().forEach((key,value)->{
+				mapPathParams.put(key, decodeUrlEncode(value));
+			});
 			convertParam(listParams,mapPathParams, params);
 		}
 		// from attribute

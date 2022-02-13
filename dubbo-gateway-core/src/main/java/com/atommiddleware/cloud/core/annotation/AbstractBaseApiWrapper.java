@@ -1,6 +1,5 @@
 package com.atommiddleware.cloud.core.annotation;
 
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,19 +8,23 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.dubbo.common.utils.ClassUtils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 
 import com.atommiddleware.cloud.api.annotation.ParamAttribute.ParamFormat;
+import com.atommiddleware.cloud.core.config.DubboReferenceConfigProperties;
 import com.atommiddleware.cloud.core.context.DubboApiContext;
+import com.atommiddleware.cloud.core.security.XssSecurity;
+import com.atommiddleware.cloud.core.security.XssSecurity.XssFilterStrategy;
 import com.atommiddleware.cloud.core.serialize.Serialization;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public abstract class AbstractBaseApiWrapper implements BaseApiWrapper {
+public abstract class AbstractBaseApiWrapper implements BaseApiWrapper,InitializingBean {
 
 	protected Set<String> patterns = new HashSet<String>();
 
@@ -29,7 +32,15 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper {
 	private Serialization serialization;
 	@Autowired
 	protected PathMatcher pathMatcher;
-
+	@Autowired
+	private DubboReferenceConfigProperties dubboReferenceConfigProperties;
+	@Autowired(required = false)
+	private XssSecurity xssSecurity;
+	
+	private boolean xssFilterEnable=true;
+	//0 response 1 request  2 all
+	private XssFilterStrategy xssFilterStrategy;
+	
 	@Override
 	public Set<String> getPathPatterns() {
 		return patterns;
@@ -70,6 +81,9 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper {
 					}
 				}
 				if (!StringUtils.isEmpty(bodyString)) {
+					if(checkRequestXssStrategy(paramTypeClass)) {
+						bodyString=xssSecurity.xssClean(bodyString);
+					}
 					param = ClassUtils.convertPrimitive(paramTypeClass, bodyString);
 				}
 			} else {
@@ -101,6 +115,10 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper {
 		params[paramInfo.getIndex()] = param;
 	}
 
+	private boolean checkRequestXssStrategy(Class<?> paramTypeClass) {
+		return paramTypeClass==String.class&&xssFilterEnable&&xssFilterStrategy==XssFilterStrategy.REQUEST;
+	}
+	
 	protected void convertParam(List<ParamInfo> listParams, Map<String, String> mapPathParams, Object[] params) {
 		String paramValue = null;
 		Object param = null;
@@ -112,18 +130,16 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper {
 			if (ClassUtils.isSimpleType(paramTypeClass)) {
 				paramValue = mapPathParams.get(paramInfo.getParamName());
 				if (!StringUtils.isEmpty(paramValue)) {
-				param = ClassUtils.convertPrimitive(paramTypeClass, paramValue);
-				}
-			}else {
-				if(paramInfo.getParamFormat()==ParamFormat.MAP) {
-					param= serialization.convertValue(mapPathParams, paramTypeClass);
-				}else {
-					paramValue = mapPathParams.get(paramInfo.getParamName());
-					try {
-						paramValue = java.net.URLDecoder.decode(paramValue, DubboApiContext.CHARSET);
-					} catch (UnsupportedEncodingException e) {
-						log.error("decode fail", e);
+					if(checkRequestXssStrategy(paramTypeClass)) {
+						paramValue=xssSecurity.xssClean(paramValue);
 					}
+					param = ClassUtils.convertPrimitive(paramTypeClass, paramValue);
+				}
+			} else {
+				if (paramInfo.getParamFormat() == ParamFormat.MAP) {
+					param = serialization.convertValue(mapPathParams, paramTypeClass);
+				} else {
+					paramValue = mapPathParams.get(paramInfo.getParamName());
 					param = serialization.deserialize(paramValue, paramTypeClass);
 				}
 			}
@@ -134,5 +150,12 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper {
 			params[paramInfo.getIndex()] = param;
 		}
 		mapPathParams.clear();
+	}
+	
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		xssFilterEnable=dubboReferenceConfigProperties.getSecurityConfig().isXssFilterEnable();
+		xssFilterStrategy=XssFilterStrategy.values()[dubboReferenceConfigProperties.getSecurityConfig().getXssFilterStrategy()];
+		
 	}
 }

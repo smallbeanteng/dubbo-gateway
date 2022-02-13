@@ -310,14 +310,14 @@ https://github.com/smallbeanteng/dubbo-gateway
       	<dependency>
 			<groupId>com.atommiddleware</groupId>
 			<artifactId>dubbo-gateway-api</artifactId>
-			<version>1.0.9</version>
+			<version>1.1.1</version>
 		</dependency>
 第二步：网关引入改造后的jar包，同时引用以下jar包
 
 	`	<dependency>
 			<groupId>com.atommiddleware</groupId>
 			<artifactId>dubbo-gateway-spring-boot-starter</artifactId>
-			<version>1.0.9</version>
+			<version>1.1.1</version>
 		</dependency>`
 第三步：在启动类上添加要扫描的api包名@DubboGatewayScanner(basePackages = "需扫描的api包名")
 
@@ -335,7 +335,8 @@ https://github.com/smallbeanteng/dubbo-gateway
 - dubbo-gateway-sample-web-provider 基于sevlet类型的dubbo服务提供者示例
 - dubbo-gateway-sample-web-consumer 基于sevlet类型spring mvc的项目接入dubbo-gateway示例
 - dubbo-gateway-sample-zuul 基于spring cloud zuul 接入dubbo-gateway示例
-- dubboGateWay.postman_collection.json 是导出的一份postman自测用例
+- dubboGateWay.postman_collection.json 导出的一份postman自测用例
+- dubboGateWay_XSS.postman_collection.json 导出的一份包含xss攻击代码的自测用例
 ## 配置中心 ##
 按照dubbo的正常接入配置进行配置就好了，以下贴出例子使用的配置在nacos配置中心的配置,其中filters使用了Dubbo作为过滤器
 
@@ -404,6 +405,22 @@ https://github.com/smallbeanteng/dubbo-gateway
     com.atommiddleware.cloud.config.excludUrlPatterns=
 
 includUrlPatterns参数用于配置需要进行协议转换的url，excludUrlPatterns用于排除个别url,这两个参数只对【非】网关整合有效(因与网关整合path匹配交给了网关的path参数进行匹配)
+## 安全 ##
+xss防御 1.1.1版本+
+
+示例:
+	
+    com:
+      atommiddleware:
+        cloud:
+          config:
+            securityConfig:
+              xssFilterStrategy: 0
+              xssFilterType: 0 
+
+- xssFilterStrategy 防御策略 0表示响应(response)时过滤xss,1表示请求(request)时过滤xss
+- xssFilterType 防御方式 0 表示移除xss相关脚本代码块,1表示对字符串进行html实体编码,2表示对html编码（注意：方式1的编码要比方式2的严格)
+- 默认配置 xssFilterStrategy=0，xssFilterType=0 表示在请求响应(response)时移除xss相关脚本代码块,可以按需调整,可以导入dubboGateWay_XSS.postman_collection.json进行xss移除体验
 
 ## 序列化 ##
 接口：com.atommiddleware.cloud.core.serialize
@@ -426,6 +443,6 @@ spring cloud zuul类型接口:com.atommiddleware.cloud.core.annotation.ResponseZ
 ## 其它说明 ##
 基于webflux的网关与基于servlet类的web应用接入整合方式是一样的步骤，例子使用的nacos版本2.0.3，如果需要在cookie,header,url,传递复杂参数【非java基本类型】，需先将参数转为json,然后使用UrlEncode进行编码，js中可以使用encodeURIComponent进行编码，默认只支持GET,POST方式接入，ContentType支持application/json，application/x-www-form-urlencoded，复杂参数建议使用application/json,或项目整体都使用application/json
 ## 版本说明 ##
-推荐使用1.0.9版本
+推荐使用1.1.1版本
 
     

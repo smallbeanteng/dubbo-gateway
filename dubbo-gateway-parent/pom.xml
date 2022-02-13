@@ -51,7 +51,7 @@
 	<description>The dubbo-gateway parent module of dubbo-gateway</description>
 	<url>https://github.com/smallbeanteng/dubbo-gateway</url>
 	<properties>
-		<revision>1.0.9</revision>
+		<revision>1.1.1</revision>
 		<maven_flatten_version>1.2.5</maven_flatten_version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
@@ -61,6 +61,9 @@
 		<spring-cloud-alibaba.version>2.2.7.RELEASE</spring-cloud-alibaba.version>
 		<spring-cloud.version>Hoxton.SR12</spring-cloud.version>
 		<spring-web.version>5.2.16.RELEASE</spring-web.version>
+		<antisamy.version>1.6.5</antisamy.version>
+		<encoder-esapi.version>1.2.3</encoder-esapi.version>
+		<esapi.version>2.2.0.0</esapi.version>
 		<arguments />
 	</properties>
 	<dependencyManagement>
@@ -90,6 +93,21 @@
 				<version>${spring-cloud.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.owasp.antisamy</groupId>
+				<artifactId>antisamy</artifactId>
+				<version>${antisamy.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.owasp.encoder</groupId>
+				<artifactId>encoder-esapi</artifactId>
+				<version>${encoder-esapi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.owasp.esapi</groupId>
+				<artifactId>esapi</artifactId>
+				<version>${esapi.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
