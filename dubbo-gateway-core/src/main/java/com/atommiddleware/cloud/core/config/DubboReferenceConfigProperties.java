@@ -9,6 +9,7 @@ import org.springframework.core.Ordered;
 
 import com.atommiddleware.cloud.core.security.XssSecurity.XssFilterStrategy;
 import com.atommiddleware.cloud.core.security.XssSecurity.XssFilterType;
+import com.atommiddleware.cloud.security.validation.ParamValidator.ValidatorMode;
 
 @ConfigurationProperties(prefix = "com.atommiddleware.cloud.config")
 public class DubboReferenceConfigProperties {
@@ -84,6 +85,26 @@ public class DubboReferenceConfigProperties {
 		private int xssFilterStrategy = XssFilterStrategy.RESPONSE.ordinal();
 		// 0 anti 1 esapi 2 encodehtml
 		private int xssFilterType = XssFilterType.ANTISAMY.ordinal();
+
+		private boolean validateParamEnable=true;
+		
+		private int validatorMode=ValidatorMode.FAST.ordinal();
+		
+		public boolean isValidateParamEnable() {
+			return validateParamEnable;
+		}
+
+		public void setValidateParamEnable(boolean validateParamEnable) {
+			this.validateParamEnable = validateParamEnable;
+		}
+
+		public int getValidatorMode() {
+			return validatorMode;
+		}
+
+		public void setValidatorMode(int validatorMode) {
+			this.validatorMode = validatorMode;
+		}
 
 		public int getXssFilterType() {
 			return xssFilterType;

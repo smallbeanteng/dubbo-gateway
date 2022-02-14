@@ -30,6 +30,11 @@
 			<artifactId>dubbo-gateway-api</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
+				<dependency>
+			<groupId>com.atommiddleware</groupId>
+			<artifactId>dubbo-gateway-security</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>

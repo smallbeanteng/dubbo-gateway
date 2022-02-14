@@ -20,11 +20,12 @@ import com.atommiddleware.cloud.core.context.DubboApiContext;
 import com.atommiddleware.cloud.core.security.XssSecurity;
 import com.atommiddleware.cloud.core.security.XssSecurity.XssFilterStrategy;
 import com.atommiddleware.cloud.core.serialize.Serialization;
+import com.atommiddleware.cloud.security.validation.ParamValidator;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public abstract class AbstractBaseApiWrapper implements BaseApiWrapper,InitializingBean {
+public abstract class AbstractBaseApiWrapper implements BaseApiWrapper, InitializingBean {
 
 	protected Set<String> patterns = new HashSet<String>();
 
@@ -36,11 +37,14 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper,Initializ
 	private DubboReferenceConfigProperties dubboReferenceConfigProperties;
 	@Autowired(required = false)
 	private XssSecurity xssSecurity;
+	@Autowired(required = false)
+	private ParamValidator paramValidator;
 	
-	private boolean xssFilterEnable=true;
-	//0 response 1 request  2 all
+	private boolean xssFilterEnable = true;
+	private boolean validateParamEnable = true;
+	// 0 response 1 request 2 all
 	private XssFilterStrategy xssFilterStrategy;
-	
+
 	@Override
 	public Set<String> getPathPatterns() {
 		return patterns;
@@ -53,6 +57,11 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper,Initializ
 		params[paramInfo.getIndex()] = obj;
 	}
 
+	private void validateParam(Object domain) {
+		if(validateParamEnable&&null!=domain) {
+			paramValidator.validate(domain);
+		}
+	}
 	protected void convertBodyToParam(ParamInfo paramInfo, Object body, Object[] params)
 			throws IllegalAccessException, InvocationTargetException, InstantiationException {
 		if (paramInfo.isRequired() && StringUtils.isEmpty(body)) {
@@ -81,19 +90,21 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper,Initializ
 					}
 				}
 				if (!StringUtils.isEmpty(bodyString)) {
-					if(checkRequestXssStrategy(paramTypeClass)) {
-						bodyString=xssSecurity.xssClean(bodyString);
+					if (checkRequestXssStrategy(paramTypeClass)) {
+						bodyString = xssSecurity.xssClean(bodyString);
 					}
 					param = ClassUtils.convertPrimitive(paramTypeClass, bodyString);
 				}
 			} else {
 				if (body instanceof String) {
 					param = serialization.deserialize((String) body, paramTypeClass);
+					validateParam(param);
 				} else {
 					if (body instanceof MultiValueMap) {
 						MultiValueMap<String, String> multiValueMap = (MultiValueMap<String, String>) body;
 						param = serialization.convertValue(multiValueMap.toSingleValueMap(), paramTypeClass);
 						multiValueMap.clear();
+						validateParam(param);
 					} else {
 						Map<String, String[]> multiValueMap = (Map<String, String[]>) body;
 						Map<String, String> mapValues = new HashMap<String, String>();
@@ -104,6 +115,7 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper,Initializ
 						});
 						param = serialization.convertValue(mapValues, paramTypeClass);
 						mapValues.clear();
+						validateParam(param);
 					}
 				}
 			}
@@ -116,9 +128,9 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper,Initializ
 	}
 
 	private boolean checkRequestXssStrategy(Class<?> paramTypeClass) {
-		return paramTypeClass==String.class&&xssFilterEnable&&xssFilterStrategy==XssFilterStrategy.REQUEST;
+		return paramTypeClass == String.class && xssFilterEnable && xssFilterStrategy == XssFilterStrategy.REQUEST;
 	}
-	
+
 	protected void convertParam(List<ParamInfo> listParams, Map<String, String> mapPathParams, Object[] params) {
 		String paramValue = null;
 		Object param = null;
@@ -130,17 +142,19 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper,Initializ
 			if (ClassUtils.isSimpleType(paramTypeClass)) {
 				paramValue = mapPathParams.get(paramInfo.getParamName());
 				if (!StringUtils.isEmpty(paramValue)) {
-					if(checkRequestXssStrategy(paramTypeClass)) {
-						paramValue=xssSecurity.xssClean(paramValue);
+					if (checkRequestXssStrategy(paramTypeClass)) {
+						paramValue = xssSecurity.xssClean(paramValue);
 					}
 					param = ClassUtils.convertPrimitive(paramTypeClass, paramValue);
 				}
 			} else {
 				if (paramInfo.getParamFormat() == ParamFormat.MAP) {
 					param = serialization.convertValue(mapPathParams, paramTypeClass);
+					validateParam(param);
 				} else {
 					paramValue = mapPathParams.get(paramInfo.getParamName());
 					param = serialization.deserialize(paramValue, paramTypeClass);
+					validateParam(param);
 				}
 			}
 			if (paramInfo.isRequired() && null == param) {
@@ -151,11 +165,13 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper,Initializ
 		}
 		mapPathParams.clear();
 	}
-	
+
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		xssFilterEnable=dubboReferenceConfigProperties.getSecurityConfig().isXssFilterEnable();
-		xssFilterStrategy=XssFilterStrategy.values()[dubboReferenceConfigProperties.getSecurityConfig().getXssFilterStrategy()];
-		
+		xssFilterEnable = dubboReferenceConfigProperties.getSecurityConfig().isXssFilterEnable();
+		xssFilterStrategy = XssFilterStrategy.values()[dubboReferenceConfigProperties.getSecurityConfig()
+				.getXssFilterStrategy()];
+		validateParamEnable=dubboReferenceConfigProperties.getSecurityConfig().isValidateParamEnable();
+
 	}
 }

@@ -6,7 +6,6 @@ import static org.springframework.cloud.netflix.zuul.filters.support.FilterConst
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -15,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.atommiddleware.cloud.api.annotation.PathMapping.RequestMethod;
 import com.atommiddleware.cloud.core.annotation.DubboApiServletWrapper;
@@ -100,7 +100,12 @@ public class DubboServletZuulFilter extends ZuulFilter {
 							CompletableFuture completableFuture = dubboApiWrapper.handler(pathPattern, httpServletRequest,
 									HttpUtils.getBodyParam(httpServletRequest));
 							return responseResult.sevletZuulResponse(serialization.serialize(completableFuture.get()));
-						} catch (Exception e) {
+						}
+						catch(ResponseStatusException e) {
+							log.error("path:[" + pathPattern + "] fail to apply ", e);
+							return responseResult.sevletZuulResponseException(e.getStatus(), e.getReason());
+						}
+						catch (Exception e) {
 							log.error("path:[" + pathPattern + "] fail to apply ", e);
 						}
 						return responseResult.sevletZuulResponseException(HttpStatus.INTERNAL_SERVER_ERROR,"dubboApiWrapper.handler fail");
@@ -111,7 +116,12 @@ public class DubboServletZuulFilter extends ZuulFilter {
 						CompletableFuture completableFuture = dubboApiWrapper.handler(pathPattern, httpServletRequest,
 								httpServletRequest.getParameterMap());
 							return responseResult.sevletZuulResponse(serialization.serialize(completableFuture.get()));
-						} catch (InterruptedException | ExecutionException e) {
+						} 
+						catch(ResponseStatusException e) {
+							log.error("path:[" + pathPattern + "] fail to apply ", e);
+							return responseResult.sevletZuulResponseException(e.getStatus(),e.getReason());
+						}
+						catch (Exception e) {
 							log.error("path:[" + pathPattern + "] fail to apply ", e);
 						}
 						return responseResult.sevletZuulResponseException(HttpStatus.INTERNAL_SERVER_ERROR,"dubboApiWrapper.handler fail");
@@ -124,7 +134,12 @@ public class DubboServletZuulFilter extends ZuulFilter {
 					CompletableFuture completableFuture = dubboApiWrapper.handler(pathPattern, httpServletRequest,
 							null);
 						return responseResult.sevletZuulResponse(serialization.serialize(completableFuture.get()));
-					} catch (Exception e) {
+					} 
+					catch(ResponseStatusException e) {
+						log.error("path:[" + pathPattern + "] fail to apply ", e);
+						return responseResult.sevletZuulResponseException(e.getStatus(),e.getReason());
+					}
+					catch (Exception e) {
 						log.error("path:[" + pathPattern + "] fail to apply ", e);
 					}
 					return responseResult.sevletZuulResponseException(HttpStatus.INTERNAL_SERVER_ERROR,"dubboApiWrapper.handler fail");

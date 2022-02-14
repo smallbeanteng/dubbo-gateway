@@ -4,12 +4,18 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Date;
 
+import javax.validation.constraints.NotBlank;
+
+import org.hibernate.validator.constraints.Length;
+
 public class User implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	@NotBlank(message = "用户名称不能为空")
+	@Length(min = 1, max = 200, message = "用户名称请输入1-200个英文字符或者1-100个汉字")
 	private String userName;
-
+	
 	private String password;
 
 	private Integer age;

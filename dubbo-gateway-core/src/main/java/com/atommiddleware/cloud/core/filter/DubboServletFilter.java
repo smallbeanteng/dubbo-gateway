@@ -3,7 +3,6 @@ package com.atommiddleware.cloud.core.filter;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -18,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.atommiddleware.cloud.api.annotation.PathMapping.RequestMethod;
 import com.atommiddleware.cloud.core.annotation.DubboApiServletWrapper;
@@ -112,7 +112,13 @@ public class DubboServletFilter implements Filter, OrderedFilter {
 							responseResult.sevletResponse(httpServletRequest, httpServletResponse,
 									serialization.serialize(completableFuture.get()));
 							return;
-						} catch (Exception e) {
+						} 
+						catch(ResponseStatusException e) {
+							log.error("path:[" + pathPattern + "] fail to apply ", e);
+							responseResult.sevletResponseException(httpServletRequest,httpServletResponse,e.getStatus(),e.getReason());
+							return;
+						}
+						catch (Exception e) {
 							log.error("path:[" + pathPattern + "] fail to apply ", e);
 						}
 						responseResult.sevletResponseException(httpServletRequest, httpServletResponse, HttpStatus.INTERNAL_SERVER_ERROR, "dubboApiWrapper.handler fail");
@@ -126,7 +132,13 @@ public class DubboServletFilter implements Filter, OrderedFilter {
 							responseResult.sevletResponse(httpServletRequest, httpServletResponse,
 									serialization.serialize(completableFuture.get()));
 							return;
-						} catch (InterruptedException | ExecutionException e) {
+						} 
+						catch(ResponseStatusException e) {
+							log.error("path:[" + pathPattern + "] fail to apply ", e);
+							responseResult.sevletResponseException(httpServletRequest,httpServletResponse,e.getStatus(),e.getReason());
+							return;
+						}
+						catch (Exception e) {
 							log.error("path:[" + pathPattern + "] fail to apply ", e);
 						}
 						responseResult.sevletResponseException(httpServletRequest, httpServletResponse, HttpStatus.INTERNAL_SERVER_ERROR, "dubboApiWrapper.handler fail");
@@ -143,7 +155,13 @@ public class DubboServletFilter implements Filter, OrderedFilter {
 						responseResult.sevletResponse(httpServletRequest, httpServletResponse,
 								serialization.serialize(completableFuture.get()));
 						return;
-					} catch (Exception e) {
+					} 
+					catch(ResponseStatusException e) {
+						log.error("path:[" + pathPattern + "] fail to apply ", e);
+						responseResult.sevletResponseException(httpServletRequest,httpServletResponse,e.getStatus(),e.getReason());
+						return;
+					}
+					catch (Exception e) {
 						log.error("path:[" + pathPattern + "] fail to apply ", e);
 					}
 					responseResult.sevletResponseException(httpServletRequest, httpServletResponse, HttpStatus.INTERNAL_SERVER_ERROR, "dubboApiWrapper.handler fail");

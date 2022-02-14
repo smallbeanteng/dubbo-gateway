@@ -17,4 +17,5 @@ com:
       config:
         securityConfig:
           xssFilterStrategy: 0
-          xssFilterType: 0       
+          xssFilterType: 0
+          validatorMode: 1       

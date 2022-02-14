@@ -1,6 +1,7 @@
 package com.atommiddleware.cloud.autoconfigure;
 
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -17,16 +18,18 @@ import com.atommiddleware.cloud.core.security.XssSecurity;
 import com.atommiddleware.cloud.core.security.XssSecurity.XssFilterStrategy;
 import com.atommiddleware.cloud.core.serialize.JacksonSerialization;
 import com.atommiddleware.cloud.core.serialize.Serialization;
+import com.atommiddleware.cloud.security.validation.DefaultParamValidator;
+import com.atommiddleware.cloud.security.validation.ParamValidator;
+import com.atommiddleware.cloud.security.validation.ParamValidator.ValidatorMode;
 
 @Configuration
 @ConditionalOnProperty(prefix = "com.atommiddleware.cloud.config", name = "enable", havingValue = "true", matchIfMissing = true)
 @AutoConfigureAfter(name = "org.springframework.cloud.gateway.config.GatewayAutoConfiguration")
 public class DubboGatewayCommonAutoConfiguration {
 
-
 	@Bean
 	@ConditionalOnMissingBean
-	@ConditionalOnProperty(prefix = "com.atommiddleware.cloud.config.securityConfig", name = "xssFilterType", havingValue = "0",matchIfMissing = true)
+	@ConditionalOnProperty(prefix = "com.atommiddleware.cloud.config.securityConfig", name = "xssFilterType", havingValue = "0", matchIfMissing = true)
 	public XssSecurity xssSecurity(ResourceLoader resourceLoader,
 			DubboReferenceConfigProperties dubboReferenceConfigProperties) {
 		return new DefaultXssSecurity(resourceLoader,
@@ -46,7 +49,7 @@ public class DubboGatewayCommonAutoConfiguration {
 	public XssSecurity xssSecurityEncodeHtml() {
 		return new EncodeHtmlXssSecurity();
 	}
-	
+
 	@Bean
 	@ConditionalOnMissingBean
 	public Serialization serialization(DubboReferenceConfigProperties dubboReferenceConfigProperties,
@@ -60,5 +63,14 @@ public class DubboGatewayCommonAutoConfiguration {
 	@ConditionalOnMissingBean
 	public PathMatcher pathMatcher() {
 		return new AntPathMatcher();
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	@ConditionalOnProperty(prefix = "com.atommiddleware.cloud.config.securityConfig", name = "validateParamEnable", havingValue = "true", matchIfMissing = true)
+	@ConditionalOnClass(name = "org.hibernate.validator.constraints.Length")
+	public ParamValidator paramValidator(DubboReferenceConfigProperties dubboReferenceConfigProperties) {
+		return new DefaultParamValidator(
+				ValidatorMode.values()[dubboReferenceConfigProperties.getSecurityConfig().getValidatorMode()]);
 	}
 }
