@@ -22,30 +22,30 @@ import com.atommiddleware.cloud.security.validation.DefaultParamValidator;
 import com.atommiddleware.cloud.security.validation.ParamValidator;
 import com.atommiddleware.cloud.security.validation.ParamValidator.ValidatorMode;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(prefix = "com.atommiddleware.cloud.config", name = "enable", havingValue = "true", matchIfMissing = true)
 @AutoConfigureAfter(name = "org.springframework.cloud.gateway.config.GatewayAutoConfiguration")
 public class DubboGatewayCommonAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	@ConditionalOnProperty(prefix = "com.atommiddleware.cloud.config.securityConfig", name = "xssFilterType", havingValue = "0", matchIfMissing = true)
-	public XssSecurity xssSecurity(ResourceLoader resourceLoader,
-			DubboReferenceConfigProperties dubboReferenceConfigProperties) {
-		return new DefaultXssSecurity(resourceLoader,
-				dubboReferenceConfigProperties.getSecurityConfig().getAntisamyFileLocationPattern());
-	}
-
-	@Bean
-	@ConditionalOnMissingBean
-	@ConditionalOnProperty(prefix = "com.atommiddleware.cloud.config.securityConfig", name = "xssFilterType", havingValue = "1")
+	@ConditionalOnProperty(prefix = "com.atommiddleware.cloud.config.security.xss", name = "filterMode", havingValue = "0", matchIfMissing = true)
 	public XssSecurity xssSecurityEsapiEncodeHtml() {
 		return new EsapiEncodeHtmlXssSecurity();
 	}
 
 	@Bean
 	@ConditionalOnMissingBean
-	@ConditionalOnProperty(prefix = "com.atommiddleware.cloud.config.securityConfig", name = "xssFilterType", havingValue = "2")
+	@ConditionalOnProperty(prefix = "com.atommiddleware.cloud.config.security.xss", name = "filterMode", havingValue = "1")
+	public XssSecurity xssSecurity(ResourceLoader resourceLoader,
+			DubboReferenceConfigProperties dubboReferenceConfigProperties) {
+		return new DefaultXssSecurity(resourceLoader,
+				dubboReferenceConfigProperties.getSecurity().getXss().getAntisamyFileLocationPattern());
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	@ConditionalOnProperty(prefix = "com.atommiddleware.cloud.config.security.xss", name = "filterMode", havingValue = "2")
 	public XssSecurity xssSecurityEncodeHtml() {
 		return new EncodeHtmlXssSecurity();
 	}
@@ -54,9 +54,8 @@ public class DubboGatewayCommonAutoConfiguration {
 	@ConditionalOnMissingBean
 	public Serialization serialization(DubboReferenceConfigProperties dubboReferenceConfigProperties,
 			XssSecurity xssSecurity) {
-		return new JacksonSerialization(dubboReferenceConfigProperties.getSecurityConfig().isXssFilterEnable(),
-				xssSecurity,
-				XssFilterStrategy.values()[dubboReferenceConfigProperties.getSecurityConfig().getXssFilterStrategy()]);
+		return new JacksonSerialization(dubboReferenceConfigProperties.getSecurity().getXss().isEnable(), xssSecurity,
+				XssFilterStrategy.values()[dubboReferenceConfigProperties.getSecurity().getXss().getFilterStrategy()]);
 	}
 
 	@Bean
@@ -67,10 +66,10 @@ public class DubboGatewayCommonAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	@ConditionalOnProperty(prefix = "com.atommiddleware.cloud.config.securityConfig", name = "validateParamEnable", havingValue = "true", matchIfMissing = true)
+	@ConditionalOnProperty(prefix = "com.atommiddleware.cloud.config.security.paramCheck", name = "enable", havingValue = "true", matchIfMissing = true)
 	@ConditionalOnClass(name = "org.hibernate.validator.constraints.Length")
 	public ParamValidator paramValidator(DubboReferenceConfigProperties dubboReferenceConfigProperties) {
-		return new DefaultParamValidator(
-				ValidatorMode.values()[dubboReferenceConfigProperties.getSecurityConfig().getValidatorMode()]);
+		return new DefaultParamValidator(ValidatorMode.values()[dubboReferenceConfigProperties.getSecurity()
+				.getParamCheck().getValidatorMode()]);
 	}
 }

@@ -1,0 +1,60 @@
+com:
+  atommiddleware:
+    cloud:
+      config:
+        excludUrlPatterns: 
+        includUrlPatterns: /sample/*,/order/*
+        security:
+          cas:
+             enable: true
+             baseUrl: https://cas.atommiddleware.com:8865/sample/registerUserFromPathMap/admin/11/1
+             serverUrl: https://cas.atommiddleware.com:8443/cas
+             principalAttrs: username,enable
+             ignoringUrls:
+             permitUrls:
+             anonymousUrls:
+          xss:
+             enable: true
+             filterStrategy: 0
+             filterMode: 0
+             antisamyFileLocationPattern: 
+          csrf:
+             enable: false
+          paramCheck:
+             enable: true
+             validatorMode: 0
+        session:
+          cookie:
+             domain: example.org
+             name: atomSessionId
+             path: /
+             enable: true
+dubbo:
+  application:
+    name: dubbo-gateway-sample-web-consumer
+  registry:
+    address: nacos://127.0.0.1:8848
+server:
+  port: 8865
+  ssl:
+    key-password: changeit
+    key-store: file:D:/ssl/Testkey
+    key-store-password: changeit
+spring:
+  application:
+    name: dubbo-gateway-sample-web-consumer
+  redis:
+    database: 1
+    host: 127.0.0.1
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        max-wait: -1ms
+        min-idle: 0
+    port: 6379
+    timeout: 1s
+  session:
+    redis:
+      flush-mode: on_save
+    store-type: redis

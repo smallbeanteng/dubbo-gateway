@@ -8,13 +8,37 @@ spring:
         prefix: dubbo-gateway-sample
         server-addr: 127.0.0.1:8848
         file-extension: yml
+  redis:
+    database: 1
+    host: 127.0.0.1
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        max-wait: -1ms
+        min-idle: 0
+    port: 6379
+    timeout: 1s
+  session:
+    redis:
+      flush-mode: on_save
+    store-type: redis
 logging:
   path: /mnt/logs
 com:
   atommiddleware:
     cloud:
       config:
-        securityConfig:
-          xssFilterStrategy: 0
-          xssFilterType: 0
-          validatorMode: 0        
+        excludUrlPatterns: 
+        includUrlPatterns: /sample/*,/order/*
+        security:
+          xss:
+             enable: true
+             filterStrategy: 0
+             filterMode: 0
+             antisamyFileLocationPattern: 
+          csrf:
+             enable: false
+          paramCheck:
+             enable: true
+             validatorMode: 0      

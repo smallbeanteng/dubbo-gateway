@@ -15,7 +15,29 @@ com:
   atommiddleware:
     cloud:
       config:
-        securityConfig:
-          xssFilterStrategy: 0
-          xssFilterType: 0
-          validatorMode: 1       
+        security:
+          cas:
+             enable: true
+             baseUrl: https://cas.atommiddleware.com:8862/sample/registerUserFromPathMap/admin/11/1
+             serverUrl: https://cas.atommiddleware.com:8443/cas
+             principalAttrs: username,enable
+             ignoringUrls:
+             permitUrls:
+             anonymousUrls:
+          xss:
+             enable: true
+             filterStrategy: 0
+             filterMode: 0
+             antisamyFileLocationPattern: 
+          csrf:
+             enable: false
+          paramCheck:
+             enable: true
+             validatorMode: 0
+        session:
+          cookie:
+             domain: example.org
+             name: atomSessionId
+             path: /
+             enable: true
+      

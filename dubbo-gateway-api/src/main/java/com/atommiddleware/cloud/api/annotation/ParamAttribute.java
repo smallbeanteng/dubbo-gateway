@@ -23,7 +23,7 @@ public @interface ParamAttribute {
 	
 	ParamFromType paramFromType();
 	
-	ParamFormat paramFormat() default ParamFormat.JSON;
+	ParamFormat paramFormat() default ParamFormat.MAP;
 	
 	public enum ParamFormat {
 		MAP, JSON

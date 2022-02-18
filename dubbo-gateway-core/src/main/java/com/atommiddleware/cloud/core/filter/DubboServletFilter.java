@@ -2,7 +2,6 @@ package com.atommiddleware.cloud.core.filter;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -12,7 +11,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.boot.web.servlet.filter.OrderedFilter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.PathMatcher;
@@ -29,21 +27,18 @@ import com.atommiddleware.cloud.core.utils.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class DubboServletFilter implements Filter, OrderedFilter {
+public class DubboServletFilter implements Filter {
 
 	private final PathMatcher pathMatcher;
 	private final Serialization serialization;
 	private final ResponseServletResult responseResult;
-	private final int order;
 	private final String APPLICATION_FORM_URLENCODED_UTF8_VALUE = MediaType.APPLICATION_FORM_URLENCODED_VALUE
 			+ ";charset=UTF-8";
 
 	private final String[] excludUrlPatterns;
-	public DubboServletFilter(PathMatcher pathMatcher, Serialization serialization,
-			int order, ResponseServletResult responseResult,String[] excludUrlPatterns) {
+	public DubboServletFilter(PathMatcher pathMatcher, Serialization serialization, ResponseServletResult responseResult,String[] excludUrlPatterns) {
 		this.pathMatcher = pathMatcher;
 		this.serialization = serialization;
-		this.order = order;
 		this.responseResult = responseResult;
 		this.excludUrlPatterns=excludUrlPatterns;
 	}
@@ -107,10 +102,9 @@ public class DubboServletFilter implements Filter, OrderedFilter {
 							|| contentType.equals(MediaType.APPLICATION_JSON_UTF8_VALUE)) {
 						// 获取body 执行
 						try {
-						CompletableFuture completableFuture = dubboApiWrapper.handler(pathPattern, httpServletRequest,
-								HttpUtils.getBodyParam(httpServletRequest));
 							responseResult.sevletResponse(httpServletRequest, httpServletResponse,
-									serialization.serialize(completableFuture.get()));
+									serialization.serialize(dubboApiWrapper.handler(pathPattern, httpServletRequest,
+											HttpUtils.getBodyParam(httpServletRequest)).get()));
 							return;
 						} 
 						catch(ResponseStatusException e) {
@@ -127,10 +121,9 @@ public class DubboServletFilter implements Filter, OrderedFilter {
 					else if (contentType.equals(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
 							|| contentType.equals(APPLICATION_FORM_URLENCODED_UTF8_VALUE)) {
 						try {
-						CompletableFuture completableFuture = dubboApiWrapper.handler(pathPattern, httpServletRequest,
-								httpServletRequest.getParameterMap());
 							responseResult.sevletResponse(httpServletRequest, httpServletResponse,
-									serialization.serialize(completableFuture.get()));
+									serialization.serialize(dubboApiWrapper.handler(pathPattern, httpServletRequest,
+											httpServletRequest.getParameterMap()).get()));
 							return;
 						} 
 						catch(ResponseStatusException e) {
@@ -150,10 +143,9 @@ public class DubboServletFilter implements Filter, OrderedFilter {
 					}
 				} else if (httpMethodName.equals(RequestMethod.GET.name())) {
 					try {
-					CompletableFuture completableFuture = dubboApiWrapper.handler(pathPattern, httpServletRequest,
-							null);
 						responseResult.sevletResponse(httpServletRequest, httpServletResponse,
-								serialization.serialize(completableFuture.get()));
+								serialization.serialize(dubboApiWrapper.handler(pathPattern, httpServletRequest,
+										null).get()));
 						return;
 					} 
 					catch(ResponseStatusException e) {
@@ -174,11 +166,6 @@ public class DubboServletFilter implements Filter, OrderedFilter {
 
 			}
 		}
-	}
-
-	@Override
-	public int getOrder() {
-		return this.order;
 	}
 
 }

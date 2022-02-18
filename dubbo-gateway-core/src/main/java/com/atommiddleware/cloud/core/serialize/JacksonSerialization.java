@@ -1,5 +1,7 @@
 package com.atommiddleware.cloud.core.serialize;
 
+import org.springframework.util.StringUtils;
+
 import com.atommiddleware.cloud.core.security.XssSecurity;
 import com.atommiddleware.cloud.core.security.XssSecurity.XssFilterStrategy;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -83,10 +85,12 @@ public class JacksonSerialization implements Serialization {
 
 	@Override
 	public <T> T deserialize(String input, Class<T> clazz) {
+		if(StringUtils.isEmpty(input)) {
+			return null;
+		}
 		T t = null;
 		try {
-			if (enableXssFilter
-					&&  xssFilterStrategy == XssFilterStrategy.REQUEST) {
+			if (enableXssFilter && xssFilterStrategy == XssFilterStrategy.REQUEST) {
 				// 请求需要过滤xss
 				t = customXssObjectMapper.readValue(input, clazz);
 			} else {
@@ -100,10 +104,64 @@ public class JacksonSerialization implements Serialization {
 
 	@Override
 	public <T> T convertValue(Object obj, Class<T> clazz) {
+		if(null==obj) {
+			return null;
+		}
 		T t = null;
 		try {
-			if (enableXssFilter
-					&& xssFilterStrategy == XssFilterStrategy.REQUEST) {
+			if (enableXssFilter && xssFilterStrategy == XssFilterStrategy.REQUEST) {
+				t = customXssObjectMapper.convertValue(obj, clazz);
+			} else {
+				t = mapper.convertValue(obj, clazz);
+			}
+		} catch (Exception e) {
+			log.error(" parse json to class [{}] error", clazz.getSimpleName());
+		}
+		return t;
+	}
+
+	@Override
+	public String serialize(Object value, boolean ignoreXss) {
+		if(null==value) {
+			return null;
+		}
+		try {
+			if (ignoreXss) {
+				return mapper.writeValueAsString(value);
+			} else {
+				return customXssObjectMapper.writeValueAsString(value);
+			}
+		} catch (JsonProcessingException e) {
+			log.error(" toJsonString error", e);
+		}
+		return null;
+	}
+
+	@Override
+	public <T> T deserialize(String input, Class<T> clazz, boolean ignoreXss) {
+		if(StringUtils.isEmpty(input)) {
+			return null;
+		}
+		try {
+			if (ignoreXss) {
+				return mapper.readValue(input, clazz);
+			} else {
+				return customXssObjectMapper.readValue(input, clazz);
+			}
+		} catch (Exception e) {
+			log.error(" toJsonString error", e);
+		}
+		return null;
+	}
+
+	@Override
+	public <T> T convertValue(Object obj, Class<T> clazz, boolean ignoreXss) {
+		if(null==obj) {
+			return null;
+		}
+		T t = null;
+		try {
+			if (!ignoreXss) {
 				t = customXssObjectMapper.convertValue(obj, clazz);
 			} else {
 				t = mapper.convertValue(obj, clazz);

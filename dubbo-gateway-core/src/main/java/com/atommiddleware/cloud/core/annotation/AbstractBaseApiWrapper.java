@@ -21,10 +21,7 @@ import com.atommiddleware.cloud.core.security.XssSecurity;
 import com.atommiddleware.cloud.core.security.XssSecurity.XssFilterStrategy;
 import com.atommiddleware.cloud.core.serialize.Serialization;
 import com.atommiddleware.cloud.security.validation.ParamValidator;
-
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
+@SuppressWarnings("unchecked")
 public abstract class AbstractBaseApiWrapper implements BaseApiWrapper, InitializingBean {
 
 	protected Set<String> patterns = new HashSet<String>();
@@ -168,10 +165,10 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper, Initiali
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		xssFilterEnable = dubboReferenceConfigProperties.getSecurityConfig().isXssFilterEnable();
-		xssFilterStrategy = XssFilterStrategy.values()[dubboReferenceConfigProperties.getSecurityConfig()
-				.getXssFilterStrategy()];
-		validateParamEnable=dubboReferenceConfigProperties.getSecurityConfig().isValidateParamEnable();
+		xssFilterEnable = dubboReferenceConfigProperties.getSecurity().getXss().isEnable();
+		xssFilterStrategy = XssFilterStrategy.values()[dubboReferenceConfigProperties.getSecurity().getXss()
+				.getFilterStrategy()];
+		validateParamEnable=dubboReferenceConfigProperties.getSecurity().getParamCheck().isEnable();
 
 	}
 }

@@ -11,4 +11,10 @@ public interface Serialization {
 	<T> T deserialize(@NonNull String input, Class<T> clazz);
 	
 	<T> T convertValue(Object obj,Class<T> clazz);
+	
+	String serialize(Object object,boolean ignoreXss);
+	
+	<T> T deserialize(@NonNull String input, Class<T> clazz,boolean ignoreXss);
+	
+	<T> T convertValue(Object obj,Class<T> clazz,boolean ignoreXss);
 }

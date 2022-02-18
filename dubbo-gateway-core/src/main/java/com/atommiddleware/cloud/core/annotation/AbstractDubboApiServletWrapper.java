@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class AbstractDubboApiServletWrapper extends AbstractBaseApiWrapper implements DubboApiServletWrapper{
 
 	@Override
-	public CompletableFuture handler(String pathPattern, HttpServletRequest httpServletRequest, Object body) {
+	public CompletableFuture<Object> handler(String pathPattern, HttpServletRequest httpServletRequest, Object body) {
 		  throw new UnsupportedOperationException();
 	}
 	

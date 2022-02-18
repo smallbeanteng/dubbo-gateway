@@ -3,7 +3,7 @@ dubbo-gateway 高性能dubbo网关，提供了http协议到dubbo协议的转换,
 ## 泛化缺点 ##
 - 泛化过程数据流会经过了三次转换, 会产生大量的临时对象, 有很大的内存要求。使用反射方式对于旨在榨干服务器性能以获取高吞吐量的系统来说, 难以达到性能最佳
 - 同时服务端也会对泛化请求多一重 Map <-> POJO 的来回转换的过程。整体上，与普通的Dubbo调用相比有10-20%的损耗
-- 泛化调用在网关或服务消费者阶段无法校验参数类型的有效性，数据要到服务提供者反序列化时才能校验出参数类型的有效性
+- 泛化调用在网关或服务消费者阶段无法校验参数类型及参数的有效性，数据要到服务提供者使用阶段时才能校验出参数的有效性
 ## 开源地址 ##
 https://github.com/smallbeanteng/dubbo-gateway
 ## 相关注解 ##
@@ -158,7 +158,8 @@ https://github.com/smallbeanteng/dubbo-gateway
 	@AliasFor(annotation = ParamAttribute.class)
 	boolean required() default true;
 ## 配置示例 ##
-    @GateWayDubbo("userService")
+
+	@GateWayDubbo("userService")
     public interface UserService {
 
 	/**
@@ -196,7 +197,7 @@ https://github.com/smallbeanteng/dubbo-gateway
 	 * @return 结果
 	 */
 	@PathMapping(value="/sample/registerUserFromHeader",requestMethod=RequestMethod.GET)
-	Result registerUserFromHeader(@FromHeader("user") User user);
+	Result registerUserFromHeader(@FromHeader(value = "user",paramFormat = ParamFormat.JSON) User user);
 	/**
 	 * header中以key value方式传递对象参数,headerName=headerValue转换为beanPropertyName=beanPropertyValue
 	 * headerName 对应bean 的propertyName,headerValue对应bean的propertyValue
@@ -211,7 +212,7 @@ https://github.com/smallbeanteng/dubbo-gateway
 	 * @return 结果
 	 */
 	@PathMapping(value="/sample/registerUserFromCookie",requestMethod=RequestMethod.GET)
-	Result registerUserFromCookie(@FromCookie("user") User user);
+	Result registerUserFromCookie(@FromCookie(value="user",paramFormat = ParamFormat.JSON) User user);
 	/**
 	 * cookie中以 key value 方式传递对象参数,cookieName=cookieValue转化为beanPropertyName=beanPropertyValue
 	 * cookieName 对应bean 的propertyName,cookieValue对应bean的propertyValue,不支持嵌套对象转换，嵌套对象或复杂参数请用json
@@ -226,7 +227,7 @@ https://github.com/smallbeanteng/dubbo-gateway
 	 * @return 结果
 	 */
 	@PathMapping(value="/sample/registerUserFromPath/{user}",requestMethod=RequestMethod.GET)
-	Result registerUserFromPath(@FromPath("user") User user);
+	Result registerUserFromPath(@FromPath(value="user",paramFormat = ParamFormat.JSON) User user);
 	/**
 	 * path pattern对应bean的属性名称
 	 * @param user 用户信息
@@ -241,7 +242,7 @@ https://github.com/smallbeanteng/dubbo-gateway
 	 * @return 结果
 	 */
 	@PathMapping(value="/sample/getUserInfoFromQueryParamsParamFormatJSON",requestMethod=RequestMethod.GET)
-	Result getUserInfoFromQueryParamsParamFormatJSON(@FromQueryParams(value="user")User user);
+	Result getUserInfoFromQueryParamsParamFormatJSON(@FromQueryParams(value="user",paramFormat = ParamFormat.JSON)User user);
 	
 	/**
 	 * 对象参数来源于query,以key,value方式传参,key对应bean propertyName,value对应propertyValue,嵌套对象或复杂对象请使用JSON
@@ -283,7 +284,8 @@ https://github.com/smallbeanteng/dubbo-gateway
 	 */
 	@PathMapping("/sample/getUserUserInfoAll/{userId}")
 	Result getUserUserInfoAll(@FromPath("userId") Long userId,@FromCookie("age")Integer age,@FromHeader("gender")Long gender,@FromBody User user);
-    }
+}
+
 
 参数注意事项：
 
@@ -291,8 +293,8 @@ https://github.com/smallbeanteng/dubbo-gateway
 
 @FromCookie、@FromPath、@FromHeader、@FromQueryParams参数 paramFormat：
 
-- JSON方式 限定参数名称对应的值为json字符串，然后通过反序列化json字符串得到参数对象(如@FromHeader("user") httpHeader应该要有一个头名称为user并且值为【样例数据】的json字符串(UrlEncode))，此将入参看做一个整体json字符串，默认json方式
-- MAP方式 限定对象的propertyName与单个参数一一对应【例如@FromHeader(value="user",paramFormat =ParamFormat.MAP) httpHeader应该要有头名称为userName、password、age、gender、dt等与User对象属性对应的头信息，User将获取这些头信息最终组装成完整对象】,此方式不支持复杂嵌套对象,复杂嵌套对象请使用json
+- JSON方式 限定参数名称对应的值为json字符串，然后通过反序列化json字符串得到参数对象(如@FromHeader("user") httpHeader应该要有一个头名称为user并且值为【样例数据】的json字符串(UrlEncode))，此将入参看做一个整体json字符串
+- MAP方式 限定对象的propertyName与单个参数一一对应【例如@FromHeader(value="user",paramFormat =ParamFormat.MAP) httpHeader应该要有头名称为userName、password、age、gender、dt等与User对象属性对应的头信息，User将获取这些头信息最终组装成完整对象】,此方式不支持复杂嵌套对象,复杂嵌套对象请使用json,1.1.3+版本后默认为Map方式
 - 此外如果方法的参数类型本身为基本数据类型，将固定使用Map方式，具体差异可以通过导入postman的测试用例体验
 
 ## 样例数据 ##
@@ -310,14 +312,14 @@ https://github.com/smallbeanteng/dubbo-gateway
       	<dependency>
 			<groupId>com.atommiddleware</groupId>
 			<artifactId>dubbo-gateway-api</artifactId>
-			<version>1.1.2</version>
+			<version>1.1.3-beta</version>
 		</dependency>
 第二步：网关引入改造后的jar包，同时引用以下jar包
 
 	`	<dependency>
 			<groupId>com.atommiddleware</groupId>
 			<artifactId>dubbo-gateway-spring-boot-starter</artifactId>
-			<version>1.1.2</version>
+			<version>1.1.3-beta</version>
 		</dependency>`
 第三步：在启动类上添加要扫描的api包名@DubboGatewayScanner(basePackages = "需扫描的api包名")
 
@@ -407,24 +409,94 @@ https://github.com/smallbeanteng/dubbo-gateway
 includUrlPatterns参数用于配置需要进行协议转换的url，excludUrlPatterns用于排除个别url,这两个参数只对【非】网关整合有效(因与网关整合path匹配交给了网关的path参数进行匹配)
 ## 安全 ##
 xss防御 1.1.1版本+
+
 参数校验组件 1.1.2版本+
-示例:
+
+cas 认证登录 1.1.3-beta+ spring mvc 与zuul 集成了spring security cas认证与spring session
+
+配置:
 	
     com:
       atommiddleware:
         cloud:
           config:
-            securityConfig:
-              xssFilterStrategy: 0
-              xssFilterType: 0
-              validatorMode: 0 
+            security:
+              cas:
+                 enable: true
+                 baseUrl: https://cas.atommiddleware.com:8812/sys/menusAndPermissions
+                 serverUrl: https://cas.atommiddleware.com:8443/cas
+                 principalAttrs: userId,companyCode,isSuperAdmin,username
+                 ignoringUrls:
+                 permitUrls:
+                 anonymousUrls:
+              xss:
+                 enable: true
+                 filterStrategy: 0
+                 filterMode: 0
+                 antisamyFileLocationPattern:
+              csrf:
+                 enable: false
+              paramCheck:
+                 enable: true
+                 validatorMode: 0
+            session:
+              cookie:
+                 enable: true
+                 domain: atommiddleware.com
+                 name: atomSessionId
+                 path: /
 
-- xssFilterStrategy 防御策略 0表示响应(response)时过滤xss,1表示请求(request)时过滤xss
-- xssFilterType 防御方式 0 表示移除xss相关脚本代码块,1表示对字符串进行html实体编码,2表示对html编码（注意：方式1的编码要比方式2的严格)
-- 默认配置 xssFilterStrategy=0，xssFilterType=0 表示在请求响应(response)时移除xss相关脚本代码块,可以按需调整,可以导入dubboGateWay_XSS.postman_collection.json进行xss移除体验
-- validatorMode 参数校验设置，0只要校验到一个错误参数就返回，1表示所有的参数都校验一遍，多个参数错误提示语逗号分隔，参数校验组件使用的是hibernate-validator，在参数类中使用注解标记即可，网关处参数校验失败的将不会将请求转发给服务
+## cas认证 ##
+	
+	cas认证中心开源传送门:https://github.com/apereo/cas
+开启步骤:
 
-校验示例:
+	引入jar包:spring-boot-starter-security,spring-security-cas
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-cas</artifactId>
+		</dependency>
+  参数配置说明:
+![图片丢失了...](http://www.atommiddleware.com/cas.png)
+
+## xss防御 ##
+  参数配置说明:
+![图片丢失了...](http://www.atommiddleware.com/xss.png)
+
+## 参数校验 ##
+  参数配置说明: 
+![图片丢失了...](http://www.atommiddleware.com/param.png)
+
+## csrf防御 ##
+  参数配置说明
+![图片丢失了...](http://www.atommiddleware.com/csrf.png)
+
+## session共享 ##
+
+开启步骤:
+
+	引入jar包:spring-boot-starter-data-redis,spring-session-data-redis,commons-pool2
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.session</groupId>
+			<artifactId>spring-session-data-redis</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-pool2</artifactId>
+		</dependency>
+
+  参数配置说明:
+![图片丢失了...](http://www.atommiddleware.com/session.png)
+
+参数校验示例:
     
     public class Order implements Serializable {
 
@@ -460,10 +532,13 @@ spring cloud zuul类型接口:com.atommiddleware.cloud.core.annotation.ResponseZ
 - 500 内部服务器错误，一般为调用的dubbo服务抛出了异常或其它
 - 405 方法不允许,默认只支持[post,get],并且要与@PathMapping的requestMethod参数匹配
 - 400 错误的请求，一般情况是参数校验未通过
+- 其它对照HttpStatus 
 
 ## 其它说明 ##
-基于webflux的网关与基于servlet类的web应用接入整合方式是一样的步骤，例子使用的nacos版本2.0.3，如果需要在cookie,header,url,传递复杂参数【非java基本类型】，需先将参数转为json,然后使用UrlEncode进行编码，js中可以使用encodeURIComponent进行编码，默认只支持GET,POST方式接入，ContentType支持application/json，application/x-www-form-urlencoded，复杂参数建议使用application/json,或项目整体都使用application/json
+基于webflux的网关与基于servlet类的web应用接入整合方式是一样的步骤，例子使用的nacos版本2.0.3，默认支持GET,POST方式接入，ContentType支持application/json，application/x-www-form-urlencoded，复杂参数【类的属性为非基本数据类型】建议使用application/json,或项目整体都使用application/json
 ## 版本说明 ##
-推荐使用1.1.2版本
+推荐试用1.1.3-beta
+
+
 
     

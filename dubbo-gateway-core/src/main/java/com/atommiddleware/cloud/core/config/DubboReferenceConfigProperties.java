@@ -1,14 +1,15 @@
 package com.atommiddleware.cloud.core.config;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.Ordered;
 
+import com.atommiddleware.cloud.core.security.XssSecurity.XssFilterMode;
 import com.atommiddleware.cloud.core.security.XssSecurity.XssFilterStrategy;
-import com.atommiddleware.cloud.core.security.XssSecurity.XssFilterType;
 import com.atommiddleware.cloud.security.validation.ParamValidator.ValidatorMode;
 
 @ConfigurationProperties(prefix = "com.atommiddleware.cloud.config")
@@ -20,14 +21,24 @@ public class DubboReferenceConfigProperties {
 
 	private Map<String, DubboReferenceConfig> dubboRefer = new HashMap<String, DubboReferenceConfig>();
 
-	private SecurityConfig securityConfig = new SecurityConfig();
+	private SecurityConfig security = new SecurityConfig();
 
-	public SecurityConfig getSecurityConfig() {
-		return securityConfig;
+	private RedisHttpSessionConfig session = new RedisHttpSessionConfig();
+
+	public SecurityConfig getSecurity() {
+		return security;
 	}
 
-	public void setSecurityConfig(SecurityConfig securityConfig) {
-		this.securityConfig = securityConfig;
+	public void setSecurity(SecurityConfig security) {
+		this.security = security;
+	}
+
+	public RedisHttpSessionConfig getSession() {
+		return session;
+	}
+
+	public void setSession(RedisHttpSessionConfig session) {
+		this.session = session;
 	}
 
 	@Value("${includUrlPatterns:#{null}}")
@@ -76,26 +87,205 @@ public class DubboReferenceConfigProperties {
 		this.dubboRefer = dubboRefer;
 	}
 
-	public class SecurityConfig {
+	public class RedisHttpSessionConfig {
+		private CookieConfig cookie = new CookieConfig();
 
-		private boolean xssFilterEnable = true;
-
-		private String antisamyFileLocationPattern;
-		// response 0 request 1 
-		private int xssFilterStrategy = XssFilterStrategy.RESPONSE.ordinal();
-		// 0 anti 1 esapi 2 encodehtml
-		private int xssFilterType = XssFilterType.ANTISAMY.ordinal();
-
-		private boolean validateParamEnable=true;
-		
-		private int validatorMode=ValidatorMode.FAST.ordinal();
-		
-		public boolean isValidateParamEnable() {
-			return validateParamEnable;
+		public CookieConfig getCookie() {
+			return cookie;
 		}
 
-		public void setValidateParamEnable(boolean validateParamEnable) {
-			this.validateParamEnable = validateParamEnable;
+		public void setCookie(CookieConfig cookie) {
+			this.cookie = cookie;
+		}
+
+		public class CookieConfig {
+			private String domain;
+			private String name;
+			private String path;
+			private boolean enable;
+
+			public String getDomain() {
+				return domain;
+			}
+
+			public void setDomain(String domain) {
+				this.domain = domain;
+			}
+
+			public String getName() {
+				return name;
+			}
+
+			public void setName(String name) {
+				this.name = name;
+			}
+
+			public String getPath() {
+				return path;
+			}
+
+			public void setPath(String path) {
+				this.path = path;
+			}
+
+			public boolean isEnable() {
+				return enable;
+			}
+
+			public void setEnable(boolean enable) {
+				this.enable = enable;
+			}
+
+		}
+
+	}
+
+	public class SecurityConfig {
+
+		private CasConfig cas = new CasConfig();
+		private ParamCheckConfig paramCheck = new ParamCheckConfig();
+		private XssConfig xss = new XssConfig();
+		private CsrfConfig csrf = new CsrfConfig();
+
+		public CasConfig getCas() {
+			return cas;
+		}
+
+		public void setCas(CasConfig cas) {
+			this.cas = cas;
+		}
+
+		public ParamCheckConfig getParamCheck() {
+			return paramCheck;
+		}
+
+		public void setParamCheck(ParamCheckConfig paramCheck) {
+			this.paramCheck = paramCheck;
+		}
+
+		public XssConfig getXss() {
+			return xss;
+		}
+
+		public void setXss(XssConfig xss) {
+			this.xss = xss;
+		}
+
+		public CsrfConfig getCsrf() {
+			return csrf;
+		}
+
+		public void setCsrf(CsrfConfig csrf) {
+			this.csrf = csrf;
+		}
+
+	}
+
+	public class CasConfig {
+		/**
+		 * 是否启用cas
+		 */
+		private boolean enable = false;
+		/**
+		 * 默认应用服务地址
+		 */
+		private String baseUrl;
+		/**
+		 * 认证中心服务地址
+		 */
+		private String serverUrl;
+		/**
+		 * 需透传用户信息属性，多个逗号分隔
+		 */
+		@Value("${principalAttrs:#{null}}")
+		private List<String> principalAttrs;
+		/**
+		 * 忽略认证地址
+		 */
+		@Value("${ignoringUrls:#{null}}")
+		private String[] ignoringUrls;
+		/**
+		 * 允许匿名访问资源Pattern
+		 */
+		@Value("${permitUrls:#{null}}")
+		private String[] permitUrls;
+		/**
+		 * 允许匿名访问资源Pattern
+		 */
+		@Value("${anonymousUrls:#{null}}")
+		private String[] anonymousUrls;
+
+		public boolean isEnable() {
+			return enable;
+		}
+
+		public void setEnable(boolean enable) {
+			this.enable = enable;
+		}
+
+		public String getBaseUrl() {
+			return baseUrl;
+		}
+
+		public void setBaseUrl(String baseUrl) {
+			this.baseUrl = baseUrl;
+		}
+
+		public String getServerUrl() {
+			return serverUrl;
+		}
+
+		public void setServerUrl(String serverUrl) {
+			this.serverUrl = serverUrl;
+		}
+
+		public List<String> getPrincipalAttrs() {
+			return principalAttrs;
+		}
+
+		public void setPrincipalAttrs(List<String> principalAttrs) {
+			this.principalAttrs = principalAttrs;
+		}
+
+		public String[] getIgnoringUrls() {
+			return ignoringUrls;
+		}
+
+		public void setIgnoringUrls(String[] ignoringUrls) {
+			this.ignoringUrls = ignoringUrls;
+		}
+
+		public String[] getPermitUrls() {
+			return permitUrls;
+		}
+
+		public void setPermitUrls(String[] permitUrls) {
+			this.permitUrls = permitUrls;
+		}
+
+		public String[] getAnonymousUrls() {
+			return anonymousUrls;
+		}
+
+		public void setAnonymousUrls(String[] anonymousUrls) {
+			this.anonymousUrls = anonymousUrls;
+		}
+
+	}
+
+	public class ParamCheckConfig {
+		private boolean enable = true;
+		/**
+		 * 参数校验模式 0快速失败,只要有一个校验错误立即返回错误信息, 1 校验所有,所有的参数都校验一遍,错误信息逗号分隔
+		 */
+		private int validatorMode = ValidatorMode.FAST.ordinal();
+
+		public boolean isEnable() {
+			return enable;
+		}
+
+		public void setEnable(boolean enable) {
+			this.enable = enable;
 		}
 
 		public int getValidatorMode() {
@@ -106,20 +296,48 @@ public class DubboReferenceConfigProperties {
 			this.validatorMode = validatorMode;
 		}
 
-		public int getXssFilterType() {
-			return xssFilterType;
+	}
+
+	public class XssConfig {
+		/**
+		 * 是否启用xss过滤功能
+		 */
+		private boolean enable = true;
+		/**
+		 * 过滤策略 0 响应 1 请求
+		 */
+		private int filterStrategy = XssFilterStrategy.RESPONSE.ordinal();
+		/**
+		 * 过滤方式 0 html实体编码 1 清楚 2 html编码
+		 */
+		private int filterMode = XssFilterMode.ESAPI.ordinal();
+		/**
+		 * 清理配置文件路径 默认 antisamy-ebay.xml
+		 */
+		private String antisamyFileLocationPattern;
+
+		public int getFilterMode() {
+			return filterMode;
 		}
 
-		public void setXssFilterType(int xssFilterType) {
-			this.xssFilterType = xssFilterType;
+		public void setFilterMode(int filterMode) {
+			this.filterMode = filterMode;
 		}
 
-		public int getXssFilterStrategy() {
-			return xssFilterStrategy;
+		public boolean isEnable() {
+			return enable;
 		}
 
-		public void setXssFilterStrategy(int xssFilterStrategy) {
-			this.xssFilterStrategy = xssFilterStrategy;
+		public void setEnable(boolean enable) {
+			this.enable = enable;
+		}
+
+		public int getFilterStrategy() {
+			return filterStrategy;
+		}
+
+		public void setFilterStrategy(int filterStrategy) {
+			this.filterStrategy = filterStrategy;
 		}
 
 		public String getAntisamyFileLocationPattern() {
@@ -130,12 +348,20 @@ public class DubboReferenceConfigProperties {
 			this.antisamyFileLocationPattern = antisamyFileLocationPattern;
 		}
 
-		public boolean isXssFilterEnable() {
-			return xssFilterEnable;
+	}
+
+	public class CsrfConfig {
+		/**
+		 * csrf 启用 默认启用
+		 */
+		private boolean enable = true;
+
+		public boolean isEnable() {
+			return enable;
 		}
 
-		public void setXssFilterEnable(boolean xssFilterEnable) {
-			this.xssFilterEnable = xssFilterEnable;
+		public void setEnable(boolean enable) {
+			this.enable = enable;
 		}
 
 	}

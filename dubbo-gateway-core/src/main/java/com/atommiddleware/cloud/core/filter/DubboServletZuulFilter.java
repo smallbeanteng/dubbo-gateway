@@ -5,7 +5,6 @@ import static org.springframework.cloud.netflix.zuul.filters.support.FilterConst
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.SERVICE_ID_KEY;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -37,7 +36,8 @@ public class DubboServletZuulFilter extends ZuulFilter {
 	private final String APPLICATION_FORM_URLENCODED_UTF8_VALUE = MediaType.APPLICATION_FORM_URLENCODED_VALUE
 			+ ";charset=UTF-8";
 
-	public DubboServletZuulFilter(PathMatcher pathMatcher, Serialization serialization, ResponseZuulServletResult responseResult) {
+	public DubboServletZuulFilter(PathMatcher pathMatcher, Serialization serialization,
+			ResponseZuulServletResult responseResult) {
 		this.pathMatcher = pathMatcher;
 		this.serialization = serialization;
 		this.responseResult = responseResult;
@@ -47,7 +47,7 @@ public class DubboServletZuulFilter extends ZuulFilter {
 	public boolean shouldFilter() {
 		RequestContext ctx = RequestContext.getCurrentContext();
 		Object objServiceId = ctx.get(SERVICE_ID_KEY);
-		if ((ctx.getRouteHost() == null && null != objServiceId && ctx.sendZuulResponse()
+		if (!"/error".equals(ctx.getRequest().getRequestURI())&&(ctx.getRouteHost() == null && null != objServiceId && ctx.sendZuulResponse()
 				&& String.valueOf(objServiceId).startsWith("dubbo:"))) {
 			ctx.remove(SERVICE_ID_KEY);
 			ctx.remove(SERVICE_ID_HEADER);
@@ -75,7 +75,7 @@ public class DubboServletZuulFilter extends ZuulFilter {
 		}
 		if (null == dubboApiWrapperTemp) {
 			log.error("not find dubbo service for path:[{}]", pathPatternTemp);
-			return responseResult.sevletZuulResponseException(HttpStatus.NOT_FOUND,null);
+			return responseResult.sevletZuulResponseException(HttpStatus.NOT_FOUND, null);
 		} else {
 			final String pathPattern = pathPatternTemp;
 			RequestMethod requestMethod = DubboApiContext.PATTERNS_REQUESTMETHOD.get(pathPattern);
@@ -83,69 +83,65 @@ public class DubboServletZuulFilter extends ZuulFilter {
 			if (!httpMethodName.equals(requestMethod.name())) {
 				log.error("path:{} requestMethod is fail PathMapping requestMethod:{}", pathPattern,
 						requestMethod.name());
-				return responseResult.sevletZuulResponseException(HttpStatus.METHOD_NOT_ALLOWED,String.format(" PathMapping suported requestMethod:%s", requestMethod.name()));
+				return responseResult.sevletZuulResponseException(HttpStatus.METHOD_NOT_ALLOWED,
+						String.format(" PathMapping suported requestMethod:%s", requestMethod.name()));
 			} else {
 				final DubboApiServletWrapper dubboApiWrapper = dubboApiWrapperTemp;
 				// 只接收get 和post 请求 减少复杂性
 				if (httpMethodName.equals(RequestMethod.POST.name())) {
-					String contentType=httpServletRequest.getContentType();
-					if(StringUtils.isEmpty(contentType)) {
-						log.error("path:[{}] body param media must application/json or application/x-www-form-urlencoded", pathPattern);
-						return responseResult.sevletZuulResponseException(HttpStatus.UNSUPPORTED_MEDIA_TYPE,null);
+					String contentType = httpServletRequest.getContentType();
+					if (StringUtils.isEmpty(contentType)) {
+						log.error(
+								"path:[{}] body param media must application/json or application/x-www-form-urlencoded",
+								pathPattern);
+						return responseResult.sevletZuulResponseException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, null);
 					}
 					if (contentType.equals(MediaType.APPLICATION_JSON_VALUE)
 							|| contentType.equals(MediaType.APPLICATION_JSON_UTF8_VALUE)) {
 						// 获取body 执行
 						try {
-							CompletableFuture completableFuture = dubboApiWrapper.handler(pathPattern, httpServletRequest,
-									HttpUtils.getBodyParam(httpServletRequest));
-							return responseResult.sevletZuulResponse(serialization.serialize(completableFuture.get()));
-						}
-						catch(ResponseStatusException e) {
+							return responseResult.sevletZuulResponse(serialization.serialize(dubboApiWrapper.handler(pathPattern,
+									httpServletRequest, HttpUtils.getBodyParam(httpServletRequest)).get()));
+						} catch (ResponseStatusException e) {
 							log.error("path:[" + pathPattern + "] fail to apply ", e);
 							return responseResult.sevletZuulResponseException(e.getStatus(), e.getReason());
-						}
-						catch (Exception e) {
+						} catch (Exception e) {
 							log.error("path:[" + pathPattern + "] fail to apply ", e);
 						}
-						return responseResult.sevletZuulResponseException(HttpStatus.INTERNAL_SERVER_ERROR,"dubboApiWrapper.handler fail");
-					}
-					else if (contentType.equals(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+						return responseResult.sevletZuulResponseException(HttpStatus.INTERNAL_SERVER_ERROR,
+								"dubboApiWrapper.handler fail");
+					} else if (contentType.equals(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
 							|| contentType.equals(APPLICATION_FORM_URLENCODED_UTF8_VALUE)) {
 						try {
-						CompletableFuture completableFuture = dubboApiWrapper.handler(pathPattern, httpServletRequest,
-								httpServletRequest.getParameterMap());
-							return responseResult.sevletZuulResponse(serialization.serialize(completableFuture.get()));
-						} 
-						catch(ResponseStatusException e) {
+							return responseResult.sevletZuulResponse(serialization.serialize(dubboApiWrapper.handler(pathPattern,
+									httpServletRequest, httpServletRequest.getParameterMap()).get()));
+						} catch (ResponseStatusException e) {
 							log.error("path:[" + pathPattern + "] fail to apply ", e);
-							return responseResult.sevletZuulResponseException(e.getStatus(),e.getReason());
-						}
-						catch (Exception e) {
+							return responseResult.sevletZuulResponseException(e.getStatus(), e.getReason());
+						} catch (Exception e) {
 							log.error("path:[" + pathPattern + "] fail to apply ", e);
 						}
-						return responseResult.sevletZuulResponseException(HttpStatus.INTERNAL_SERVER_ERROR,"dubboApiWrapper.handler fail");
+						return responseResult.sevletZuulResponseException(HttpStatus.INTERNAL_SERVER_ERROR,
+								"dubboApiWrapper.handler fail");
 					} else {
 						log.error("path:[{}] body param media must application/json", pathPattern);
-						return responseResult.sevletZuulResponseException(HttpStatus.UNSUPPORTED_MEDIA_TYPE,null);
+						return responseResult.sevletZuulResponseException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, null);
 					}
 				} else if (httpMethodName.equals(RequestMethod.GET.name())) {
 					try {
-					CompletableFuture completableFuture = dubboApiWrapper.handler(pathPattern, httpServletRequest,
-							null);
-						return responseResult.sevletZuulResponse(serialization.serialize(completableFuture.get()));
-					} 
-					catch(ResponseStatusException e) {
+						return responseResult.sevletZuulResponse(serialization.serialize(dubboApiWrapper.handler(pathPattern, httpServletRequest,
+								null).get()));
+					} catch (ResponseStatusException e) {
 						log.error("path:[" + pathPattern + "] fail to apply ", e);
-						return responseResult.sevletZuulResponseException(e.getStatus(),e.getReason());
-					}
-					catch (Exception e) {
+						return responseResult.sevletZuulResponseException(e.getStatus(), e.getReason());
+					} catch (Exception e) {
 						log.error("path:[" + pathPattern + "] fail to apply ", e);
 					}
-					return responseResult.sevletZuulResponseException(HttpStatus.INTERNAL_SERVER_ERROR,"dubboApiWrapper.handler fail");
+					return responseResult.sevletZuulResponseException(HttpStatus.INTERNAL_SERVER_ERROR,
+							"dubboApiWrapper.handler fail");
 				} else {
 					log.error("Only get and post are supported for the time being ", pathPattern, requestMethod.name());
-					return responseResult.sevletZuulResponseException(HttpStatus.METHOD_NOT_ALLOWED,null);
+					return responseResult.sevletZuulResponseException(HttpStatus.METHOD_NOT_ALLOWED, null);
 				}
 
 			}

@@ -1,0 +1,13 @@
+dubbo:
+  application:
+    name: dubbo-gateway-sample-web-provider
+  protocol:
+    name: dubbo
+    port: 20887
+  registry:
+    address: nacos://127.0.0.1:8848
+server:
+  port: 8867
+spring:
+  application:
+    name: dubbo-gateway-sample-web-provider

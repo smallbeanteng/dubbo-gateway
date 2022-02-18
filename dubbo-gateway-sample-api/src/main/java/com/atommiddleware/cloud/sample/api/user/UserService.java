@@ -49,7 +49,7 @@ public interface UserService {
 	 * @return 结果
 	 */
 	@PathMapping(value="/sample/registerUserFromHeader",requestMethod=RequestMethod.GET)
-	Result registerUserFromHeader(@FromHeader("user") User user);
+	Result registerUserFromHeader(@FromHeader(value = "user",paramFormat = ParamFormat.JSON) User user);
 	/**
 	 * header中以key value方式传递对象参数,headerName=headerValue转换为beanPropertyName=beanPropertyValue
 	 * headerName 对应bean 的propertyName,headerValue对应bean的propertyValue
@@ -64,7 +64,7 @@ public interface UserService {
 	 * @return 结果
 	 */
 	@PathMapping(value="/sample/registerUserFromCookie",requestMethod=RequestMethod.GET)
-	Result registerUserFromCookie(@FromCookie("user") User user);
+	Result registerUserFromCookie(@FromCookie(value="user",paramFormat = ParamFormat.JSON) User user);
 	/**
 	 * cookie中以 key value 方式传递对象参数,cookieName=cookieValue转化为beanPropertyName=beanPropertyValue
 	 * cookieName 对应bean 的propertyName,cookieValue对应bean的propertyValue,不支持嵌套对象转换，嵌套对象或复杂参数请用json
@@ -79,7 +79,7 @@ public interface UserService {
 	 * @return 结果
 	 */
 	@PathMapping(value="/sample/registerUserFromPath/{user}",requestMethod=RequestMethod.GET)
-	Result registerUserFromPath(@FromPath("user") User user);
+	Result registerUserFromPath(@FromPath(value="user",paramFormat = ParamFormat.JSON) User user);
 	/**
 	 * path pattern对应bean的属性名称
 	 * @param user 用户信息
@@ -94,7 +94,7 @@ public interface UserService {
 	 * @return 结果
 	 */
 	@PathMapping(value="/sample/getUserInfoFromQueryParamsParamFormatJSON",requestMethod=RequestMethod.GET)
-	Result getUserInfoFromQueryParamsParamFormatJSON(@FromQueryParams(value="user")User user);
+	Result getUserInfoFromQueryParamsParamFormatJSON(@FromQueryParams(value="user",paramFormat = ParamFormat.JSON)User user);
 	
 	/**
 	 * 对象参数来源于query,以key,value方式传参,key对应bean propertyName,value对应propertyValue,嵌套对象或复杂对象请使用JSON

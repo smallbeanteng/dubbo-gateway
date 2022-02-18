@@ -10,6 +10,7 @@ import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.reactive.error.ErrorAttributes;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.server.RequestPredicates;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
@@ -17,11 +18,6 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.alibaba.cloud.commons.lang.StringUtils;
-
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class JsonExceptionHandler extends DefaultErrorWebExceptionHandler {
 
 	public JsonExceptionHandler(ErrorAttributes errorAttributes, ResourceProperties resourceProperties,

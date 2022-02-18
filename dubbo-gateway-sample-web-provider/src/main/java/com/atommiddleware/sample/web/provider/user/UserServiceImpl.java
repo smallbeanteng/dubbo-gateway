@@ -1,6 +1,7 @@
 package com.atommiddleware.sample.web.provider.user;
 
 import org.apache.dubbo.config.annotation.DubboService;
+import org.apache.dubbo.rpc.RpcContext;
 
 import com.atommiddleware.cloud.sample.api.Result;
 import com.atommiddleware.cloud.sample.api.user.UserService;
@@ -10,6 +11,7 @@ import com.atommiddleware.cloud.sample.api.user.domain.User;
 public class UserServiceImpl implements UserService {
 	@Override
 	public Result registerUser(User user) {
+		System.out.println(RpcContext.getContext().getAttachment("username"));
 		System.out.println(user);
 		return Result.from().setData("user", user);
 	}

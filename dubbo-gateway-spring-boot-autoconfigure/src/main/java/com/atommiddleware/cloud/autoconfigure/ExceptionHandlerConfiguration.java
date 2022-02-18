@@ -23,7 +23,7 @@ import org.springframework.web.reactive.result.view.ViewResolver;
 
 import com.atommiddleware.cloud.core.exception.JsonExceptionHandler;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties({ServerProperties.class, ResourceProperties.class})
 @ConditionalOnProperty(prefix = "com.atommiddleware.cloud.config", name = "enable", havingValue = "true", matchIfMissing = true)
 @AutoConfigureAfter(DubboGatewayAutoConfiguration.class)

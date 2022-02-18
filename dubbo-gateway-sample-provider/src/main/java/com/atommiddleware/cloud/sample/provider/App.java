@@ -9,11 +9,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  *
  */
 @SpringBootApplication
-@DubboComponentScan(basePackages ="com.atommiddleware.cloud.sample.provider")
-public class App 
-{
-    public static void main( String[] args )
-    {
-        SpringApplication.run(App.class, args);
-    }
+@DubboComponentScan(basePackages = "com.atommiddleware.cloud.sample.provider")
+public class App {
+	public static void main(String[] args) {
+		SpringApplication.run(App.class, args);
+	}
 }

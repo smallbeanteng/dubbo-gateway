@@ -6,6 +6,6 @@ import javax.servlet.http.HttpServletRequest;
 
 public interface DubboApiServletWrapper extends BaseApiWrapper {
 	
-	CompletableFuture handler(String pathPattern, HttpServletRequest httpServletRequest, Object body);
+	CompletableFuture<Object> handler(String pathPattern, HttpServletRequest httpServletRequest, Object body);
 
 }

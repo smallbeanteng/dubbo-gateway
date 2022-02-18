@@ -27,5 +27,5 @@ public @interface FromPath {
 	boolean required() default true;
 	
 	@AliasFor(annotation = ParamAttribute.class)
-	ParamFormat paramFormat() default ParamFormat.JSON;
+	ParamFormat paramFormat() default ParamFormat.MAP;
 }

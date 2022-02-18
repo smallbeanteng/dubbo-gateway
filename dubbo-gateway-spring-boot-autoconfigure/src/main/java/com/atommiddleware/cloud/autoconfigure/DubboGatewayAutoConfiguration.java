@@ -19,7 +19,7 @@ import com.atommiddleware.cloud.core.filter.DubboGatewayFilterFactory;
 import com.atommiddleware.cloud.core.filter.DubboGlobalFilter;
 import com.atommiddleware.cloud.core.serialize.Serialization;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(prefix = "com.atommiddleware.cloud.config", name = "enable", havingValue = "true", matchIfMissing = true)
 @AutoConfigureAfter(DubboGatewayCommonAutoConfiguration.class)
 @ConditionalOnWebApplication(type = Type.REACTIVE)
@@ -37,7 +37,7 @@ public class DubboGatewayAutoConfiguration {
 	@ConditionalOnMissingBean
 	public DubboGatewayFilterFactory dubboGatewayFilterFactory(ServerCodecConfigurer serverCodecConfigurer,
 			DubboReferenceConfigProperties dubboReferenceConfigProperties, ResponseReactiveResult responseResult,
-			Serialization serialization,PathMatcher pathMatcher) {
+			Serialization serialization, PathMatcher pathMatcher) {
 		return new DubboGatewayFilterFactory(pathMatcher, serialization, dubboReferenceConfigProperties,
 				serverCodecConfigurer, responseResult);
 	}
@@ -46,8 +46,8 @@ public class DubboGatewayAutoConfiguration {
 	@ConditionalOnMissingBean
 	public DubboGlobalFilter dubboGlobalFilter(ServerCodecConfigurer serverCodecConfigurer,
 			DubboReferenceConfigProperties dubboReferenceConfigProperties, ResponseReactiveResult responseResult,
-			Serialization serialization,PathMatcher pathMatcher) {
-		return new DubboGlobalFilter(pathMatcher, serialization, dubboReferenceConfigProperties,
-				serverCodecConfigurer, responseResult);
+			Serialization serialization, PathMatcher pathMatcher) {
+		return new DubboGlobalFilter(pathMatcher, serialization, dubboReferenceConfigProperties, serverCodecConfigurer,
+				responseResult);
 	}
 }

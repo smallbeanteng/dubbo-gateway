@@ -22,21 +22,24 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class AbstractDubboApiWrapper extends AbstractBaseApiWrapper implements DubboApiWrapper {
 
 	@Override
-	public CompletableFuture handler(String pathPattern, ServerWebExchange exchange,Object body) {
+	public CompletableFuture<Object> handler(String pathPattern, ServerWebExchange exchange, Object body) {
 		throw new UnsupportedOperationException();
 	}
+
 	private String decodeUrlEncode(String value) {
 		if (!StringUtils.isEmpty(value)) {
 			try {
-				  value=java.net.URLDecoder.decode(value, DubboApiContext.CHARSET);
+				value = java.net.URLDecoder.decode(value, DubboApiContext.CHARSET);
 			} catch (UnsupportedEncodingException e) {
 				log.error("decode fail", e);
 			}
 		}
 		return value;
 	}
+
 	protected void handlerConvertParams(String pathPattern, ServerWebExchange exchange, Object[] params, Object body)
-			throws InterruptedException, ExecutionException, IllegalAccessException, InvocationTargetException, InstantiationException {
+			throws InterruptedException, ExecutionException, IllegalAccessException, InvocationTargetException,
+			InstantiationException {
 		ServerHttpRequest serverHttpRequest = exchange.getRequest();
 		final Map<ParamFromType, List<ParamInfo>> mapGroupByParamType = DubboApiContext.MAP_PARAM_INFO.get(pathPattern);
 		final Map<String, String> mapPathParams = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
@@ -50,7 +53,7 @@ public abstract class AbstractDubboApiWrapper extends AbstractBaseApiWrapper imp
 			});
 			convertParam(listParams, mapPathParams, params);
 		}
-		
+
 		// body
 		listParams = mapGroupByParamType.get(ParamFromType.FROM_BODY);
 		if (!CollectionUtils.isEmpty(listParams)) {
@@ -62,27 +65,28 @@ public abstract class AbstractDubboApiWrapper extends AbstractBaseApiWrapper imp
 		// header
 		listParams = mapGroupByParamType.get(ParamFromType.FROM_HEADER);
 		if (!CollectionUtils.isEmpty(listParams)) {
-			serverHttpRequest.getHeaders().toSingleValueMap().forEach((key,value)->{
-				mapPathParams.put(key, decodeUrlEncode(value));
-			});
-			convertParam(listParams,mapPathParams, params);
-		}
-		// path
-		listParams = mapGroupByParamType.get(ParamFromType.FROM_PATH);
-		if (!CollectionUtils.isEmpty(listParams)) {
-			pathMatcher.extractUriTemplateVariables(pathPattern, serverHttpRequest.getPath().value()).forEach((key,value)->{
+			serverHttpRequest.getHeaders().toSingleValueMap().forEach((key, value) -> {
 				mapPathParams.put(key, decodeUrlEncode(value));
 			});
 			convertParam(listParams, mapPathParams, params);
 		}
-		
+		// path
+		listParams = mapGroupByParamType.get(ParamFromType.FROM_PATH);
+		if (!CollectionUtils.isEmpty(listParams)) {
+			pathMatcher.extractUriTemplateVariables(pathPattern, serverHttpRequest.getPath().value())
+					.forEach((key, value) -> {
+						mapPathParams.put(key, decodeUrlEncode(value));
+					});
+			convertParam(listParams, mapPathParams, params);
+		}
+
 		// queryParams
 		listParams = mapGroupByParamType.get(ParamFromType.FROM_QUERYPARAMS);
 		if (!CollectionUtils.isEmpty(listParams)) {
-			serverHttpRequest.getQueryParams().toSingleValueMap().forEach((key,value)->{
+			serverHttpRequest.getQueryParams().toSingleValueMap().forEach((key, value) -> {
 				mapPathParams.put(key, decodeUrlEncode(value));
 			});
-			convertParam(listParams,mapPathParams, params);
+			convertParam(listParams, mapPathParams, params);
 		}
 		// from attribute
 		listParams = mapGroupByParamType.get(ParamFromType.FROM_ATTRIBUTE);
