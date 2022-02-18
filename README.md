@@ -460,7 +460,38 @@ cas 认证登录 1.1.3-beta+ spring mvc 与zuul 集成了spring security cas认�
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-cas</artifactId>
 		</dependency>
-  参数配置说明:
+	实现自己的用户定义，用户转换，权限逻辑主要有以下几个类需要实现
+用户定义：org.springframework.security.core.userdetails 用户信息需要哪些属性
+用户转换:com.atommiddleware.cloud.security.cas.CustomUserDetailsService 此类是默认实现，需要自己实现从cas认证中心登录成功后获取到的用户信息，转换为上一步的用户定义，如果是基于Url的权限定义可以使用com.atommiddleware.cloud.security.cas.PathPatternGrantedAuthority作为权限的载体，该类实现了match方法可以对url是否符合权限进行判断
+权限逻辑:com.atommiddleware.cloud.security.cas.BasedVoter 实现对权限控制的逻辑，上一步用户转换可以给用户定义此登录用户的权限信息,在这一步可以获取到用户的权限信息，并加上验证逻辑
+
+写好以上逻辑后上述类配置在Configuration中并且自定义实现在@AutoConfigureBefore(CasSecurityAutoConfiguration.class) 加载即可,再到spring.factories配置好此配置类
+
+例子:
+	@Configuration(proxyBeanMethods = false)
+    @AutoConfigureBefore(CasSecurityAutoConfiguration.class)
+    public class MyAutoConfiguration {
+
+	@Bean
+	@ConditionalOnMissingBean
+	public BasedVoter basedVoter() {
+		return new 自定义的BasedVoter;
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	public CustomUserDetailsService customUserDetailsService() {
+		return new 自定义的CustomUserDetailsServce;
+	}
+    }
+
+在spring.factories中添加:
+
+	org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+    <包名>.MyAutoConfiguration	
+
+ 
+参数配置说明:
 ![图片丢失了...](http://www.atommiddleware.com/cas.png)
 
 ## xss防御 ##
