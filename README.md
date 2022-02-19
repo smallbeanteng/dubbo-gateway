@@ -468,6 +468,7 @@ cas 认证登录 1.1.3-beta+ spring mvc 与zuul 集成了spring security cas认�
 写好以上逻辑后上述类配置在Configuration中并且自定义实现在@AutoConfigureBefore(CasSecurityAutoConfiguration.class) 加载即可,再到spring.factories配置好此配置类
 
 例子:
+
 	@Configuration(proxyBeanMethods = false)
     @AutoConfigureBefore(CasSecurityAutoConfiguration.class)
     public class MyAutoConfiguration {
