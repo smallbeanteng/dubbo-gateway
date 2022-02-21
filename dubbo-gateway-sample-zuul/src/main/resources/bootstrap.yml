@@ -18,7 +18,7 @@ com:
         security:
           cas:
              enable: true
-             baseUrl: https://cas.atommiddleware.com:8862/sample/registerUserFromPathMap/admin/11/1
+             baseUrl: https://cas.atommiddleware.com:8862/cas/redirect?service=https://cas.atommiddleware.com:8862/sample/registerUserFromPathMap/admin/11/1
              serverUrl: https://cas.atommiddleware.com:8443/cas
              principalAttrs: username,enable
              ignoringUrls:
@@ -31,12 +31,9 @@ com:
              antisamyFileLocationPattern: 
           csrf:
              enable: false
-          paramCheck:
-             enable: true
-             validatorMode: 0
         session:
           cookie:
-             domain: example.org
+             domain: atommiddleware.com
              name: atomSessionId
              path: /
              enable: true

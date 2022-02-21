@@ -20,7 +20,6 @@ import com.atommiddleware.cloud.core.serialize.JacksonSerialization;
 import com.atommiddleware.cloud.core.serialize.Serialization;
 import com.atommiddleware.cloud.security.validation.DefaultParamValidator;
 import com.atommiddleware.cloud.security.validation.ParamValidator;
-import com.atommiddleware.cloud.security.validation.ParamValidator.ValidatorMode;
 
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(prefix = "com.atommiddleware.cloud.config", name = "enable", havingValue = "true", matchIfMissing = true)
@@ -66,10 +65,8 @@ public class DubboGatewayCommonAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	@ConditionalOnProperty(prefix = "com.atommiddleware.cloud.config.security.paramCheck", name = "enable", havingValue = "true", matchIfMissing = true)
-	@ConditionalOnClass(name = "org.hibernate.validator.constraints.Length")
-	public ParamValidator paramValidator(DubboReferenceConfigProperties dubboReferenceConfigProperties) {
-		return new DefaultParamValidator(ValidatorMode.values()[dubboReferenceConfigProperties.getSecurity()
-				.getParamCheck().getValidatorMode()]);
+	@ConditionalOnClass(name = "javax.validation.ConstraintViolationException")
+	public ParamValidator paramValidator() {
+		return new DefaultParamValidator();
 	}
 }

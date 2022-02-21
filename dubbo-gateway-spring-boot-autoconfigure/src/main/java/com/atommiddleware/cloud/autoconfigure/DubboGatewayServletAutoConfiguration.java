@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.Ordered;
 import org.springframework.util.PathMatcher;
 
@@ -18,12 +19,14 @@ import com.atommiddleware.cloud.core.config.DubboReferenceConfigProperties;
 import com.atommiddleware.cloud.core.filter.DubboServletFilter;
 import com.atommiddleware.cloud.core.filter.ServletErrorFilter;
 import com.atommiddleware.cloud.core.serialize.Serialization;
+import com.atommiddleware.cloud.security.validation.ParamValidator;
 
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(prefix = "com.atommiddleware.cloud.config", name = "enable", havingValue = "true", matchIfMissing = true)
 @ConditionalOnWebApplication(type = Type.SERVLET)
 @ConditionalOnMissingClass(value = { "com.netflix.zuul.http.ZuulServlet", "com.netflix.zuul.http.ZuulServletFilter" })
 @AutoConfigureAfter(DubboGatewayCommonAutoConfiguration.class)
+@Import(SevlertImportBeanDefinitionRegistrar.class)
 public class DubboGatewayServletAutoConfiguration {
 
 	@Bean
@@ -37,11 +40,11 @@ public class DubboGatewayServletAutoConfiguration {
 	@ConditionalOnMissingBean(name = "registerDubboGatewayFilter")
 	public FilterRegistrationBean<DubboServletFilter> registerDubboGatewayFilter(
 			DubboReferenceConfigProperties dubboReferenceConfigProperties, PathMatcher pathMatcher,
-			Serialization serialization, ResponseServletResult responseResult) {
+			Serialization serialization, ResponseServletResult responseResult,ParamValidator paramValidator) {
 		FilterRegistrationBean<DubboServletFilter> registration = new FilterRegistrationBean<DubboServletFilter>();
 		registration.setFilter(
 				new DubboServletFilter(pathMatcher, serialization,
-						responseResult, dubboReferenceConfigProperties.getExcludUrlPatterns()));
+						responseResult, dubboReferenceConfigProperties.getExcludUrlPatterns(),paramValidator));
 		if (null != dubboReferenceConfigProperties.getIncludUrlPatterns()
 				&& dubboReferenceConfigProperties.getIncludUrlPatterns().length > 0) {
 			registration.addUrlPatterns(dubboReferenceConfigProperties.getIncludUrlPatterns());

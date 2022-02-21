@@ -46,10 +46,15 @@ public class CasSecurityWebSecurityConfigurerAdapterAutoConfiguration extends We
 	
 	@Override
 	public void configure(WebSecurity web) throws Exception {
-		String[] ignoringUrls = dubboReferenceConfigProperties.getSecurity().getCas().getIgnoringUrls();
-		if (!ArrayUtils.isEmpty(ignoringUrls)) {
-			web.ignoring().antMatchers(ignoringUrls);
+		List<String> ignoringUrls=Lists.newArrayList("/login/cas","/favicon.ico","/error");
+		if (!ArrayUtils.isEmpty(dubboReferenceConfigProperties.getSecurity().getCas().getIgnoringUrls())) {
+			for(String strIgnoringUrl:dubboReferenceConfigProperties.getSecurity().getCas().getIgnoringUrls()) {
+				if(!ignoringUrls.contains(strIgnoringUrl)) {
+					ignoringUrls.add(strIgnoringUrl);
+				}
+			}
 		}
+		web.ignoring().antMatchers(ignoringUrls.toArray(new String[ignoringUrls.size()]));
 		super.configure(web);
 	}
 
@@ -64,7 +69,7 @@ public class CasSecurityWebSecurityConfigurerAdapterAutoConfiguration extends We
 				}
 			}
 		}
-		http.authorizeRequests().antMatchers(anonymousUrls.toArray(new String[] {})).anonymous();
+		http.authorizeRequests().antMatchers(anonymousUrls.toArray(new String[anonymousUrls.size()])).anonymous();
 		if(!ArrayUtils.isEmpty(dubboReferenceConfigProperties.getSecurity().getCas().getPermitUrls())) {
 			http.authorizeRequests().antMatchers(dubboReferenceConfigProperties.getSecurity().getCas().getPermitUrls()).permitAll();
 		}

@@ -20,7 +20,6 @@ import com.atommiddleware.cloud.core.context.DubboApiContext;
 import com.atommiddleware.cloud.core.security.XssSecurity;
 import com.atommiddleware.cloud.core.security.XssSecurity.XssFilterStrategy;
 import com.atommiddleware.cloud.core.serialize.Serialization;
-import com.atommiddleware.cloud.security.validation.ParamValidator;
 @SuppressWarnings("unchecked")
 public abstract class AbstractBaseApiWrapper implements BaseApiWrapper, InitializingBean {
 
@@ -34,11 +33,7 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper, Initiali
 	private DubboReferenceConfigProperties dubboReferenceConfigProperties;
 	@Autowired(required = false)
 	private XssSecurity xssSecurity;
-	@Autowired(required = false)
-	private ParamValidator paramValidator;
-	
 	private boolean xssFilterEnable = true;
-	private boolean validateParamEnable = true;
 	// 0 response 1 request 2 all
 	private XssFilterStrategy xssFilterStrategy;
 
@@ -54,11 +49,6 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper, Initiali
 		params[paramInfo.getIndex()] = obj;
 	}
 
-	private void validateParam(Object domain) {
-		if(validateParamEnable&&null!=domain) {
-			paramValidator.validate(domain);
-		}
-	}
 	protected void convertBodyToParam(ParamInfo paramInfo, Object body, Object[] params)
 			throws IllegalAccessException, InvocationTargetException, InstantiationException {
 		if (paramInfo.isRequired() && StringUtils.isEmpty(body)) {
@@ -95,13 +85,11 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper, Initiali
 			} else {
 				if (body instanceof String) {
 					param = serialization.deserialize((String) body, paramTypeClass);
-					validateParam(param);
 				} else {
 					if (body instanceof MultiValueMap) {
 						MultiValueMap<String, String> multiValueMap = (MultiValueMap<String, String>) body;
 						param = serialization.convertValue(multiValueMap.toSingleValueMap(), paramTypeClass);
 						multiValueMap.clear();
-						validateParam(param);
 					} else {
 						Map<String, String[]> multiValueMap = (Map<String, String[]>) body;
 						Map<String, String> mapValues = new HashMap<String, String>();
@@ -112,7 +100,6 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper, Initiali
 						});
 						param = serialization.convertValue(mapValues, paramTypeClass);
 						mapValues.clear();
-						validateParam(param);
 					}
 				}
 			}
@@ -147,11 +134,9 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper, Initiali
 			} else {
 				if (paramInfo.getParamFormat() == ParamFormat.MAP) {
 					param = serialization.convertValue(mapPathParams, paramTypeClass);
-					validateParam(param);
 				} else {
 					paramValue = mapPathParams.get(paramInfo.getParamName());
 					param = serialization.deserialize(paramValue, paramTypeClass);
-					validateParam(param);
 				}
 			}
 			if (paramInfo.isRequired() && null == param) {
@@ -168,7 +153,6 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper, Initiali
 		xssFilterEnable = dubboReferenceConfigProperties.getSecurity().getXss().isEnable();
 		xssFilterStrategy = XssFilterStrategy.values()[dubboReferenceConfigProperties.getSecurity().getXss()
 				.getFilterStrategy()];
-		validateParamEnable=dubboReferenceConfigProperties.getSecurity().getParamCheck().isEnable();
 
 	}
 }

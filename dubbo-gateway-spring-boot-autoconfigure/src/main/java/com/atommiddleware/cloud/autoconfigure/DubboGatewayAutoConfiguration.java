@@ -15,7 +15,6 @@ import org.springframework.util.PathMatcher;
 import com.atommiddleware.cloud.core.annotation.DefaultResponseResult;
 import com.atommiddleware.cloud.core.annotation.ResponseReactiveResult;
 import com.atommiddleware.cloud.core.config.DubboReferenceConfigProperties;
-import com.atommiddleware.cloud.core.filter.DubboGatewayFilterFactory;
 import com.atommiddleware.cloud.core.filter.DubboGlobalFilter;
 import com.atommiddleware.cloud.core.serialize.Serialization;
 
@@ -30,16 +29,6 @@ public class DubboGatewayAutoConfiguration {
 	@ConditionalOnMissingBean
 	public ResponseReactiveResult responseResult(DubboReferenceConfigProperties dubboReferenceConfigProperties) {
 		return new DefaultResponseResult(dubboReferenceConfigProperties);
-	}
-
-	@Deprecated
-	@Bean
-	@ConditionalOnMissingBean
-	public DubboGatewayFilterFactory dubboGatewayFilterFactory(ServerCodecConfigurer serverCodecConfigurer,
-			DubboReferenceConfigProperties dubboReferenceConfigProperties, ResponseReactiveResult responseResult,
-			Serialization serialization, PathMatcher pathMatcher) {
-		return new DubboGatewayFilterFactory(pathMatcher, serialization, dubboReferenceConfigProperties,
-				serverCodecConfigurer, responseResult);
 	}
 
 	@Bean

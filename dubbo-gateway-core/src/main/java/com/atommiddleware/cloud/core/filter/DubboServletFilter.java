@@ -10,6 +10,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolationException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,6 +24,7 @@ import com.atommiddleware.cloud.core.annotation.ResponseServletResult;
 import com.atommiddleware.cloud.core.context.DubboApiContext;
 import com.atommiddleware.cloud.core.serialize.Serialization;
 import com.atommiddleware.cloud.core.utils.HttpUtils;
+import com.atommiddleware.cloud.security.validation.ParamValidator;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,13 +36,16 @@ public class DubboServletFilter implements Filter {
 	private final ResponseServletResult responseResult;
 	private final String APPLICATION_FORM_URLENCODED_UTF8_VALUE = MediaType.APPLICATION_FORM_URLENCODED_VALUE
 			+ ";charset=UTF-8";
-
+	private final ParamValidator paramValidator;
 	private final String[] excludUrlPatterns;
-	public DubboServletFilter(PathMatcher pathMatcher, Serialization serialization, ResponseServletResult responseResult,String[] excludUrlPatterns) {
+
+	public DubboServletFilter(PathMatcher pathMatcher, Serialization serialization,
+			ResponseServletResult responseResult, String[] excludUrlPatterns, ParamValidator paramValidator) {
 		this.pathMatcher = pathMatcher;
 		this.serialization = serialization;
 		this.responseResult = responseResult;
-		this.excludUrlPatterns=excludUrlPatterns;
+		this.excludUrlPatterns = excludUrlPatterns;
+		this.paramValidator = paramValidator;
 	}
 
 	@Override
@@ -49,16 +54,16 @@ public class DubboServletFilter implements Filter {
 		HttpServletRequest httpServletRequest = (HttpServletRequest) request;
 		String path = httpServletRequest.getRequestURI();
 		String pathPatternTemp = path;
-		//排除匹配
-		if(null!=excludUrlPatterns&&excludUrlPatterns.length>0) {
-			boolean isExclud=false;
-			for(String urlPattern:excludUrlPatterns) {
-				if(pathMatcher.match(urlPattern, path)) {
-					isExclud=true;
+		// 排除匹配
+		if (null != excludUrlPatterns && excludUrlPatterns.length > 0) {
+			boolean isExclud = false;
+			for (String urlPattern : excludUrlPatterns) {
+				if (pathMatcher.match(urlPattern, path)) {
+					isExclud = true;
 					break;
 				}
 			}
-			if(isExclud) {
+			if (isExclud) {
 				chain.doFilter(request, response);
 				return;
 			}
@@ -86,16 +91,20 @@ public class DubboServletFilter implements Filter {
 			if (!httpMethodName.equals(requestMethod.name())) {
 				log.error("path:{} requestMethod is fail PathMapping requestMethod:{}", pathPattern,
 						requestMethod.name());
-				responseResult.sevletResponseException(httpServletRequest, httpServletResponse, HttpStatus.METHOD_NOT_ALLOWED, null);
+				responseResult.sevletResponseException(httpServletRequest, httpServletResponse,
+						HttpStatus.METHOD_NOT_ALLOWED, null);
 				return;
 			} else {
 				final DubboApiServletWrapper dubboApiWrapper = dubboApiWrapperTemp;
 				// 只接收get 和post 请求 减少复杂性
 				if (httpMethodName.equals(RequestMethod.POST.name())) {
-					String contentType=httpServletRequest.getContentType();
-					if(StringUtils.isEmpty(contentType)) {
-						log.error("path:[{}] body param media must application/json or application/x-www-form-urlencoded", pathPattern);
-						responseResult.sevletResponseException(httpServletRequest, httpServletResponse, HttpStatus.UNSUPPORTED_MEDIA_TYPE,null);
+					String contentType = httpServletRequest.getContentType();
+					if (StringUtils.isEmpty(contentType)) {
+						log.error(
+								"path:[{}] body param media must application/json or application/x-www-form-urlencoded",
+								pathPattern);
+						responseResult.sevletResponseException(httpServletRequest, httpServletResponse,
+								HttpStatus.UNSUPPORTED_MEDIA_TYPE, null);
 						return;
 					}
 					if (contentType.equals(MediaType.APPLICATION_JSON_VALUE)
@@ -106,61 +115,81 @@ public class DubboServletFilter implements Filter {
 									serialization.serialize(dubboApiWrapper.handler(pathPattern, httpServletRequest,
 											HttpUtils.getBodyParam(httpServletRequest)).get()));
 							return;
-						} 
-						catch(ResponseStatusException e) {
+						} catch (ConstraintViolationException e) {
+							String errorResult = paramValidator.appendFailReason(e.getConstraintViolations());
 							log.error("path:[" + pathPattern + "] fail to apply ", e);
-							responseResult.sevletResponseException(httpServletRequest,httpServletResponse,e.getStatus(),e.getReason());
+							responseResult.sevletResponseException(httpServletRequest, httpServletResponse,
+									HttpStatus.BAD_REQUEST, errorResult);
 							return;
-						}
-						catch (Exception e) {
+						} catch (ResponseStatusException e) {
+							log.error("path:[" + pathPattern + "] fail to apply ", e);
+							responseResult.sevletResponseException(httpServletRequest, httpServletResponse,
+									e.getStatus(), e.getReason());
+							return;
+						} catch (Exception e) {
 							log.error("path:[" + pathPattern + "] fail to apply ", e);
 						}
-						responseResult.sevletResponseException(httpServletRequest, httpServletResponse, HttpStatus.INTERNAL_SERVER_ERROR, "dubboApiWrapper.handler fail");
+						responseResult.sevletResponseException(httpServletRequest, httpServletResponse,
+								HttpStatus.INTERNAL_SERVER_ERROR, null);
 						return;
-					}
-					else if (contentType.equals(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+					} else if (contentType.equals(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
 							|| contentType.equals(APPLICATION_FORM_URLENCODED_UTF8_VALUE)) {
 						try {
 							responseResult.sevletResponse(httpServletRequest, httpServletResponse,
 									serialization.serialize(dubboApiWrapper.handler(pathPattern, httpServletRequest,
 											httpServletRequest.getParameterMap()).get()));
 							return;
-						} 
-						catch(ResponseStatusException e) {
+						}catch (ConstraintViolationException e) {
+							String errorResult = paramValidator.appendFailReason(e.getConstraintViolations());
 							log.error("path:[" + pathPattern + "] fail to apply ", e);
-							responseResult.sevletResponseException(httpServletRequest,httpServletResponse,e.getStatus(),e.getReason());
+							responseResult.sevletResponseException(httpServletRequest, httpServletResponse,
+									HttpStatus.BAD_REQUEST, errorResult);
 							return;
-						}
-						catch (Exception e) {
+						} catch (ResponseStatusException e) {
+							log.error("path:[" + pathPattern + "] fail to apply ", e);
+							responseResult.sevletResponseException(httpServletRequest, httpServletResponse,
+									e.getStatus(), e.getReason());
+							return;
+						} catch (Exception e) {
 							log.error("path:[" + pathPattern + "] fail to apply ", e);
 						}
-						responseResult.sevletResponseException(httpServletRequest, httpServletResponse, HttpStatus.INTERNAL_SERVER_ERROR, "dubboApiWrapper.handler fail");
+						responseResult.sevletResponseException(httpServletRequest, httpServletResponse,
+								HttpStatus.INTERNAL_SERVER_ERROR, null);
 						return;
 					} else {
-						log.error("path:[{}] body param media must application/json or application/x-www-form-urlencoded", pathPattern);
-						responseResult.sevletResponseException(httpServletRequest, httpServletResponse, HttpStatus.UNSUPPORTED_MEDIA_TYPE,null);
+						log.error(
+								"path:[{}] body param media must application/json or application/x-www-form-urlencoded",
+								pathPattern);
+						responseResult.sevletResponseException(httpServletRequest, httpServletResponse,
+								HttpStatus.UNSUPPORTED_MEDIA_TYPE, null);
 						return;
 					}
 				} else if (httpMethodName.equals(RequestMethod.GET.name())) {
 					try {
-						responseResult.sevletResponse(httpServletRequest, httpServletResponse,
-								serialization.serialize(dubboApiWrapper.handler(pathPattern, httpServletRequest,
-										null).get()));
+						responseResult.sevletResponse(httpServletRequest, httpServletResponse, serialization
+								.serialize(dubboApiWrapper.handler(pathPattern, httpServletRequest, null).get()));
 						return;
-					} 
-					catch(ResponseStatusException e) {
+					}catch (ConstraintViolationException e) {
+						String errorResult = paramValidator.appendFailReason(e.getConstraintViolations());
 						log.error("path:[" + pathPattern + "] fail to apply ", e);
-						responseResult.sevletResponseException(httpServletRequest,httpServletResponse,e.getStatus(),e.getReason());
+						responseResult.sevletResponseException(httpServletRequest, httpServletResponse,
+								HttpStatus.BAD_REQUEST, errorResult);
 						return;
-					}
-					catch (Exception e) {
+					} catch (ResponseStatusException e) {
+						log.error("path:[" + pathPattern + "] fail to apply ", e);
+						responseResult.sevletResponseException(httpServletRequest, httpServletResponse, e.getStatus(),
+								e.getReason());
+						return;
+					} catch (Exception e) {
 						log.error("path:[" + pathPattern + "] fail to apply ", e);
 					}
-					responseResult.sevletResponseException(httpServletRequest, httpServletResponse, HttpStatus.INTERNAL_SERVER_ERROR, "dubboApiWrapper.handler fail");
+					responseResult.sevletResponseException(httpServletRequest, httpServletResponse,
+							HttpStatus.INTERNAL_SERVER_ERROR, null);
 					return;
 				} else {
 					log.error("Only get and post are supported for the time being ", pathPattern, requestMethod.name());
-					responseResult.sevletResponseException(httpServletRequest, httpServletResponse, HttpStatus.METHOD_NOT_ALLOWED, null);
+					responseResult.sevletResponseException(httpServletRequest, httpServletResponse,
+							HttpStatus.METHOD_NOT_ALLOWED, null);
 					return;
 				}
 

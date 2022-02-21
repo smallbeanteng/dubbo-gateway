@@ -7,7 +7,7 @@ com:
         security:
           cas:
              enable: true
-             baseUrl: https://cas.atommiddleware.com:8865/sample/registerUserFromPathMap/admin/11/1
+             baseUrl: https://cas.atommiddleware.com:8865/cas/redirect?service=https://cas.atommiddleware.com:8862/sample/registerUserFromPathMap/admin/11/1
              serverUrl: https://cas.atommiddleware.com:8443/cas
              principalAttrs: username,enable
              ignoringUrls:
@@ -20,12 +20,9 @@ com:
              antisamyFileLocationPattern: 
           csrf:
              enable: false
-          paramCheck:
-             enable: true
-             validatorMode: 0
         session:
           cookie:
-             domain: example.org
+             domain: atommiddleware.com
              name: atomSessionId
              path: /
              enable: true
@@ -38,7 +35,7 @@ server:
   port: 8865
   ssl:
     key-password: changeit
-    key-store: file:D:/ssl/Testkey
+    key-store: file:D:\secur\atommiddleware.keystore
     key-store-password: changeit
 spring:
   application:

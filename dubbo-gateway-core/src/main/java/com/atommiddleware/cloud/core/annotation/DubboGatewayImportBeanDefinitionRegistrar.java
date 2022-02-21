@@ -94,7 +94,7 @@ public class DubboGatewayImportBeanDefinitionRegistrar
 				classWrapper = dubboApiWrapperFactory.make(null != objId ? String.valueOf(objId) : null,
 						Class.forName(candidateComponent.getBeanClassName()), dubboReferenceConfigProperties,DubboGateWayApplicationListener.WEBAPPLICATIONTYPE);
 				if (null != classWrapper) {
-					registry.registerBeanDefinition(classWrapper.getName(),
+					registry.registerBeanDefinition(classWrapper.getSimpleName(),
 							BeanDefinitionBuilder.genericBeanDefinition(classWrapper).getBeanDefinition());
 				} else {
 					if (log.isWarnEnabled()) {

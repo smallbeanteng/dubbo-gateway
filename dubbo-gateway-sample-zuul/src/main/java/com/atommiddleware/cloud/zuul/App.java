@@ -13,6 +13,7 @@ import com.atommiddleware.cloud.core.annotation.DubboGatewayScanner;
 @DubboGatewayScanner(basePackages = "com.atommiddleware.cloud.sample.api")
 public class App {
 	public static void main(String[] args) {
+		//SendResponseFilter
 		SpringApplication.run(App.class, args);
 	}
 }

@@ -11,6 +11,7 @@ import com.atommiddleware.cloud.api.annotation.PathMapping;
 import com.atommiddleware.cloud.api.annotation.PathMapping.RequestMethod;
 import com.atommiddleware.cloud.sample.api.Result;
 import com.atommiddleware.cloud.sample.api.user.domain.User;
+
 @GateWayDubbo("userService")
 public interface UserService {
 
@@ -124,7 +125,7 @@ public interface UserService {
 	 * @return 返回查询结果
 	 */
 	@PathMapping(value="/sample/getUserInfo/byHeaderAndCookie",requestMethod=RequestMethod.GET)
-	Result getUserInfo(@FromHeader("userId")Long userId,@FromCookie("age")Integer age);
+	Result getUserInfo(@FromHeader("userId")Long userId,@FromCookie("age") Integer age);
 
 	/**
 	 * 全场景

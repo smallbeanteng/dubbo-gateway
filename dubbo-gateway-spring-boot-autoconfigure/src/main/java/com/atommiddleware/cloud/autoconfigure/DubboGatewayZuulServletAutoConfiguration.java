@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.cloud.netflix.zuul.filters.ZuulProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.util.PathMatcher;
 
 import com.atommiddleware.cloud.core.annotation.DefaultResponseZuulServletResult;
@@ -17,6 +18,7 @@ import com.atommiddleware.cloud.core.config.DubboReferenceConfigProperties;
 import com.atommiddleware.cloud.core.filter.DubboServletZuulFilter;
 import com.atommiddleware.cloud.core.filter.ZuulErrorFilter;
 import com.atommiddleware.cloud.core.serialize.Serialization;
+import com.atommiddleware.cloud.security.validation.ParamValidator;
 import com.netflix.zuul.filters.ZuulServletFilter;
 import com.netflix.zuul.http.ZuulServlet;
 
@@ -25,6 +27,7 @@ import com.netflix.zuul.http.ZuulServlet;
 @ConditionalOnWebApplication(type = Type.SERVLET)
 @ConditionalOnClass({ ZuulServlet.class, ZuulServletFilter.class })
 @AutoConfigureAfter(DubboGatewayCommonAutoConfiguration.class)
+@Import(SevlertImportBeanDefinitionRegistrar.class)
 public class DubboGatewayZuulServletAutoConfiguration {
 
 	@Bean
@@ -37,14 +40,14 @@ public class DubboGatewayZuulServletAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	public DubboServletZuulFilter dubboServletZuulFilter(PathMatcher pathMatcher, Serialization serialization,
-			ResponseZuulServletResult responseZuulServletResult,ZuulProperties properties) {
-		return new DubboServletZuulFilter(pathMatcher, serialization, responseZuulServletResult);
+			ResponseZuulServletResult responseZuulServletResult, ZuulProperties properties,
+			ParamValidator paramValidator) {
+		return new DubboServletZuulFilter(pathMatcher, serialization, responseZuulServletResult, paramValidator);
 	}
-	
+
 	@Bean
 	@ConditionalOnMissingBean
-	public ZuulErrorFilter dubboZuulErrorFilter(
-			ResponseZuulServletResult responseZuulServletResult) {
+	public ZuulErrorFilter dubboZuulErrorFilter(ResponseZuulServletResult responseZuulServletResult) {
 		return new ZuulErrorFilter(responseZuulServletResult);
 	}
 }

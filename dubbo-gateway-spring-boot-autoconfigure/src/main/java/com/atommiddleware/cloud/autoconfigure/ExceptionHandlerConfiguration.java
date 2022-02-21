@@ -22,6 +22,7 @@ import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.web.reactive.result.view.ViewResolver;
 
 import com.atommiddleware.cloud.core.exception.JsonExceptionHandler;
+import com.atommiddleware.cloud.security.validation.ParamValidator;
 
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties({ServerProperties.class, ResourceProperties.class})
@@ -40,16 +41,18 @@ public class ExceptionHandlerConfiguration {
 
     private final ServerCodecConfigurer serverCodecConfigurer;
 
+    private final ParamValidator paramValidator;
     public ExceptionHandlerConfiguration(ServerProperties serverProperties,
                                          ResourceProperties resourceProperties,
                                          ObjectProvider<List<ViewResolver>> viewResolversProvider,
                                          ServerCodecConfigurer serverCodecConfigurer,
-                                         ApplicationContext applicationContext) {
+                                         ApplicationContext applicationContext,ParamValidator paramValidator) {
         this.serverProperties = serverProperties;
         this.applicationContext = applicationContext;
         this.resourceProperties = resourceProperties;
         this.viewResolvers = viewResolversProvider.getIfAvailable(Collections::emptyList);
         this.serverCodecConfigurer = serverCodecConfigurer;
+        this.paramValidator=paramValidator;
     }
 
     @Bean
@@ -59,7 +62,7 @@ public class ExceptionHandlerConfiguration {
                 errorAttributes,
                 this.resourceProperties,
                 this.serverProperties.getError(),
-                this.applicationContext);
+                this.applicationContext,this.paramValidator);
         exceptionHandler.setViewResolvers(this.viewResolvers);
         exceptionHandler.setMessageWriters(this.serverCodecConfigurer.getWriters());
         exceptionHandler.setMessageReaders(this.serverCodecConfigurer.getReaders());

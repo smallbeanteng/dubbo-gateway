@@ -7,6 +7,7 @@ import static org.springframework.cloud.netflix.zuul.filters.support.FilterConst
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolationException;
 
 import org.springframework.cloud.netflix.zuul.filters.support.FilterConstants;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,7 @@ import com.atommiddleware.cloud.core.annotation.ResponseZuulServletResult;
 import com.atommiddleware.cloud.core.context.DubboApiContext;
 import com.atommiddleware.cloud.core.serialize.Serialization;
 import com.atommiddleware.cloud.core.utils.HttpUtils;
+import com.atommiddleware.cloud.security.validation.ParamValidator;
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
 import com.netflix.zuul.exception.ZuulException;
@@ -35,12 +37,13 @@ public class DubboServletZuulFilter extends ZuulFilter {
 	private final ResponseZuulServletResult responseResult;
 	private final String APPLICATION_FORM_URLENCODED_UTF8_VALUE = MediaType.APPLICATION_FORM_URLENCODED_VALUE
 			+ ";charset=UTF-8";
-
+	private final ParamValidator paramValidator;
 	public DubboServletZuulFilter(PathMatcher pathMatcher, Serialization serialization,
-			ResponseZuulServletResult responseResult) {
+			ResponseZuulServletResult responseResult,ParamValidator paramValidator) {
 		this.pathMatcher = pathMatcher;
 		this.serialization = serialization;
 		this.responseResult = responseResult;
+		this.paramValidator=paramValidator;
 	}
 
 	@Override
@@ -102,7 +105,15 @@ public class DubboServletZuulFilter extends ZuulFilter {
 						try {
 							return responseResult.sevletZuulResponse(serialization.serialize(dubboApiWrapper.handler(pathPattern,
 									httpServletRequest, HttpUtils.getBodyParam(httpServletRequest)).get()));
-						} catch (ResponseStatusException e) {
+						} 
+						catch(ConstraintViolationException e) {
+							String errorResult = paramValidator
+									.appendFailReason(e.getConstraintViolations());
+							log.error("path:[" + pathPattern + "] fail to apply ", e);
+							return responseResult.sevletZuulResponseException(HttpStatus.BAD_REQUEST,
+									errorResult);
+						}
+						catch (ResponseStatusException e) {
 							log.error("path:[" + pathPattern + "] fail to apply ", e);
 							return responseResult.sevletZuulResponseException(e.getStatus(), e.getReason());
 						} catch (Exception e) {
@@ -115,7 +126,15 @@ public class DubboServletZuulFilter extends ZuulFilter {
 						try {
 							return responseResult.sevletZuulResponse(serialization.serialize(dubboApiWrapper.handler(pathPattern,
 									httpServletRequest, httpServletRequest.getParameterMap()).get()));
-						} catch (ResponseStatusException e) {
+						}
+						catch(ConstraintViolationException e) {
+							String errorResult = paramValidator
+									.appendFailReason(e.getConstraintViolations());
+							log.error("path:[" + pathPattern + "] fail to apply ", e);
+							return responseResult.sevletZuulResponseException(HttpStatus.BAD_REQUEST,
+									errorResult);
+						}
+						catch (ResponseStatusException e) {
 							log.error("path:[" + pathPattern + "] fail to apply ", e);
 							return responseResult.sevletZuulResponseException(e.getStatus(), e.getReason());
 						} catch (Exception e) {
@@ -131,7 +150,15 @@ public class DubboServletZuulFilter extends ZuulFilter {
 					try {
 						return responseResult.sevletZuulResponse(serialization.serialize(dubboApiWrapper.handler(pathPattern, httpServletRequest,
 								null).get()));
-					} catch (ResponseStatusException e) {
+					}
+					catch(ConstraintViolationException e) {
+						String errorResult = paramValidator
+								.appendFailReason(e.getConstraintViolations());
+						log.error("path:[" + pathPattern + "] fail to apply ", e);
+						return responseResult.sevletZuulResponseException(HttpStatus.BAD_REQUEST,
+								errorResult);
+					}
+					catch (ResponseStatusException e) {
 						log.error("path:[" + pathPattern + "] fail to apply ", e);
 						return responseResult.sevletZuulResponseException(e.getStatus(), e.getReason());
 					} catch (Exception e) {

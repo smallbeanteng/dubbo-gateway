@@ -1,10 +1,11 @@
 package com.atommiddleware.cloud.security.validation;
 
-public interface ParamValidator {
+import java.util.Set;
 
-	void validate(Object domain);
+import javax.validation.ConstraintViolation;
+
+public interface ParamValidator {
 	
-	public enum ValidatorMode{
-		FAST,ALL
-	}
+	String appendFailReason(Set<ConstraintViolation<?>> validateResult);
+	
 }

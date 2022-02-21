@@ -10,7 +10,6 @@ import org.springframework.core.Ordered;
 
 import com.atommiddleware.cloud.core.security.XssSecurity.XssFilterMode;
 import com.atommiddleware.cloud.core.security.XssSecurity.XssFilterStrategy;
-import com.atommiddleware.cloud.security.validation.ParamValidator.ValidatorMode;
 
 @ConfigurationProperties(prefix = "com.atommiddleware.cloud.config")
 public class DubboReferenceConfigProperties {
@@ -143,7 +142,6 @@ public class DubboReferenceConfigProperties {
 	public class SecurityConfig {
 
 		private CasConfig cas = new CasConfig();
-		private ParamCheckConfig paramCheck = new ParamCheckConfig();
 		private XssConfig xss = new XssConfig();
 		private CsrfConfig csrf = new CsrfConfig();
 
@@ -153,14 +151,6 @@ public class DubboReferenceConfigProperties {
 
 		public void setCas(CasConfig cas) {
 			this.cas = cas;
-		}
-
-		public ParamCheckConfig getParamCheck() {
-			return paramCheck;
-		}
-
-		public void setParamCheck(ParamCheckConfig paramCheck) {
-			this.paramCheck = paramCheck;
 		}
 
 		public XssConfig getXss() {
@@ -269,31 +259,6 @@ public class DubboReferenceConfigProperties {
 
 		public void setAnonymousUrls(String[] anonymousUrls) {
 			this.anonymousUrls = anonymousUrls;
-		}
-
-	}
-
-	public class ParamCheckConfig {
-		private boolean enable = true;
-		/**
-		 * 参数校验模式 0快速失败,只要有一个校验错误立即返回错误信息, 1 校验所有,所有的参数都校验一遍,错误信息逗号分隔
-		 */
-		private int validatorMode = ValidatorMode.FAST.ordinal();
-
-		public boolean isEnable() {
-			return enable;
-		}
-
-		public void setEnable(boolean enable) {
-			this.enable = enable;
-		}
-
-		public int getValidatorMode() {
-			return validatorMode;
-		}
-
-		public void setValidatorMode(int validatorMode) {
-			this.validatorMode = validatorMode;
 		}
 
 	}
