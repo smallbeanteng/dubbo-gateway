@@ -144,6 +144,15 @@ public class DubboReferenceConfigProperties {
 		private CasConfig cas = new CasConfig();
 		private XssConfig xss = new XssConfig();
 		private CsrfConfig csrf = new CsrfConfig();
+		private CorsConfig cors=new CorsConfig();
+		
+		public CorsConfig getCors() {
+			return cors;
+		}
+
+		public void setCors(CorsConfig cors) {
+			this.cors = cors;
+		}
 
 		public CasConfig getCas() {
 			return cas;
@@ -170,7 +179,73 @@ public class DubboReferenceConfigProperties {
 		}
 
 	}
-
+	public class CorsConfig{
+		/**
+		 * 是否开启cors
+		 */
+		private boolean enable=true;
+		/**
+		 * 允许跨域访问的来源
+		 */
+		@Value("${allowedOrigins:#{null}}")
+		private List<String> allowedOrigins;
+		/**
+		 * 允许请求的方法
+		 */
+		@Value("${allowedMethods:#{null}}")
+		private List<String> allowedMethods;
+		/**
+		 * 允许额外的头
+		 */
+		@Value("${allowedHeaders:#{null}}")
+		private List<String> allowedHeaders;
+		/**
+		 * 执行跨域校验的path
+		 */
+		private String path="/**";
+		/**
+		 * 缓存多少秒
+		 */
+		private int maxAge=600;
+		
+		public int getMaxAge() {
+			return maxAge;
+		}
+		public void setMaxAge(int maxAge) {
+			this.maxAge = maxAge;
+		}
+		public boolean isEnable() {
+			return enable;
+		}
+		public void setEnable(boolean enable) {
+			this.enable = enable;
+		}
+		public List<String> getAllowedOrigins() {
+			return allowedOrigins;
+		}
+		public void setAllowedOrigins(List<String> allowedOrigins) {
+			this.allowedOrigins = allowedOrigins;
+		}
+		public List<String> getAllowedMethods() {
+			return allowedMethods;
+		}
+		public void setAllowedMethods(List<String> allowedMethods) {
+			this.allowedMethods = allowedMethods;
+		}
+		public List<String> getAllowedHeaders() {
+			return allowedHeaders;
+		}
+		public void setAllowedHeaders(List<String> allowedHeaders) {
+			this.allowedHeaders = allowedHeaders;
+		}
+		public String getPath() {
+			return path;
+		}
+		public void setPath(String path) {
+			this.path = path;
+		}
+		
+	}
 	public class CasConfig {
 		/**
 		 * 是否启用cas
@@ -320,6 +395,43 @@ public class DubboReferenceConfigProperties {
 		 * csrf 启用 默认启用
 		 */
 		private boolean enable = true;
+		
+		private String domain;
+		private String name;
+		private String path;
+		private boolean httpOnly=false;
+		
+		public boolean isHttpOnly() {
+			return httpOnly;
+		}
+
+		public void setHttpOnly(boolean httpOnly) {
+			this.httpOnly = httpOnly;
+		}
+
+		public String getDomain() {
+			return domain;
+		}
+
+		public void setDomain(String domain) {
+			this.domain = domain;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getPath() {
+			return path;
+		}
+
+		public void setPath(String path) {
+			this.path = path;
+		}
 
 		public boolean isEnable() {
 			return enable;

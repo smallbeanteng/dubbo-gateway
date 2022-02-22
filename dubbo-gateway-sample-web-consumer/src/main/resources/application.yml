@@ -2,12 +2,10 @@ com:
   atommiddleware:
     cloud:
       config:
-        excludUrlPatterns: 
-        includUrlPatterns: /sample/*,/order/*
         security:
           cas:
              enable: true
-             baseUrl: https://cas.atommiddleware.com:8865/cas/redirect?service=https://cas.atommiddleware.com:8862/sample/registerUserFromPathMap/admin/11/1
+             baseUrl: https://cas.atommiddleware.com:8862/cas/redirect?service=https://cas.atommiddleware.com:8862/sample/registerUserFromPathMap/admin/11/1
              serverUrl: https://cas.atommiddleware.com:8443/cas
              principalAttrs: username,enable
              ignoringUrls:
@@ -19,7 +17,15 @@ com:
              filterMode: 0
              antisamyFileLocationPattern: 
           csrf:
-             enable: false
+             enable: true
+             domain: atommiddleware.com
+             path: /
+          cors:
+             enable: true
+             allowedOrigins: https://admin.atommiddleware.com:9628,https://cas.atommiddleware.com:8862
+             allowedHeaders: X-Requested-With,content-type,X-XSRF-TOKEN
+             allowedMethods: GET,POST
+             maxAge: 3600 
         session:
           cookie:
              domain: atommiddleware.com

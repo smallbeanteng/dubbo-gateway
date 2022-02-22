@@ -30,7 +30,15 @@ com:
              filterMode: 0
              antisamyFileLocationPattern: 
           csrf:
-             enable: false
+             enable: true
+             domain: atommiddleware.com
+             path: /
+          cors:
+             enable: true
+             allowedOrigins: https://admin.atommiddleware.com:9628,https://cas.atommiddleware.com:8862
+             allowedHeaders: X-Requested-With,content-type,X-XSRF-TOKEN
+             allowedMethods: GET,POST
+             maxAge: 3600 
         session:
           cookie:
              domain: atommiddleware.com

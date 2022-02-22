@@ -17,6 +17,7 @@ import org.springframework.web.server.session.CookieWebSessionIdResolver;
 import org.springframework.web.server.session.WebSessionIdResolver;
 
 import com.atommiddleware.cloud.core.config.DubboReferenceConfigProperties;
+import com.atommiddleware.cloud.core.config.DubboReferenceConfigProperties.RedisHttpSessionConfig.CookieConfig;
 
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(CookieSerializer.class)
@@ -32,17 +33,18 @@ public class RedisHttpSessionAutoConfiguration {
 		@ConditionalOnMissingBean
 		public CookieSerializer cookieSerializer(DubboReferenceConfigProperties dubboReferenceConfigProperties) {
 			DefaultCookieSerializer defaultCookieSerializer = new DefaultCookieSerializer();
-			if (!StringUtils.isEmpty(dubboReferenceConfigProperties.getSession().getCookie().getName())) {
+			CookieConfig cookieConfig=dubboReferenceConfigProperties.getSession().getCookie();
+			if (!StringUtils.isEmpty(cookieConfig.getName())) {
 				defaultCookieSerializer
-						.setCookieName(dubboReferenceConfigProperties.getSession().getCookie().getName());
+						.setCookieName(cookieConfig.getName());
 			}
-			if (!StringUtils.isEmpty(dubboReferenceConfigProperties.getSession().getCookie().getDomain())) {
+			if (!StringUtils.isEmpty(cookieConfig.getDomain())) {
 				defaultCookieSerializer
-						.setDomainName(dubboReferenceConfigProperties.getSession().getCookie().getDomain());
+						.setDomainName(cookieConfig.getDomain());
 			}
-			if (!StringUtils.isEmpty(dubboReferenceConfigProperties.getSession().getCookie().getPath())) {
+			if (!StringUtils.isEmpty(cookieConfig.getPath())) {
 				defaultCookieSerializer
-						.setCookiePath(dubboReferenceConfigProperties.getSession().getCookie().getPath());
+						.setCookiePath(cookieConfig.getPath());
 			}
 			return defaultCookieSerializer;
 		}
@@ -58,16 +60,17 @@ public class RedisHttpSessionAutoConfiguration {
 		public WebSessionIdResolver webSessionIdResolver(
 				DubboReferenceConfigProperties dubboReferenceConfigProperties) {
 			CookieWebSessionIdResolver resolver = new CookieWebSessionIdResolver();
+			CookieConfig cookieConfig=dubboReferenceConfigProperties.getSession().getCookie();
 			resolver.addCookieInitializer(o -> {
-				if (!StringUtils.isEmpty(dubboReferenceConfigProperties.getSession().getCookie().getDomain())) {
-					o.domain(dubboReferenceConfigProperties.getSession().getCookie().getDomain());
+				if (!StringUtils.isEmpty(cookieConfig.getDomain())) {
+					o.domain(cookieConfig.getDomain());
 				}
-				if (!StringUtils.isEmpty(dubboReferenceConfigProperties.getSession().getCookie().getPath())) {
-					o.path(dubboReferenceConfigProperties.getSession().getCookie().getPath());
+				if (!StringUtils.isEmpty(cookieConfig.getPath())) {
+					o.path(cookieConfig.getPath());
 				}
 			});
-			if (!StringUtils.isEmpty(dubboReferenceConfigProperties.getSession().getCookie().getName())) {
-				resolver.setCookieName(dubboReferenceConfigProperties.getSession().getCookie().getName());
+			if (!StringUtils.isEmpty(cookieConfig.getName())) {
+				resolver.setCookieName(cookieConfig.getName());
 			}
 			return resolver;
 		}

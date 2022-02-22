@@ -16,6 +16,7 @@ import org.springframework.util.StringUtils;
 
 import com.atommiddleware.cloud.api.annotation.ParamAttribute.ParamFormat;
 import com.atommiddleware.cloud.core.config.DubboReferenceConfigProperties;
+import com.atommiddleware.cloud.core.config.DubboReferenceConfigProperties.XssConfig;
 import com.atommiddleware.cloud.core.context.DubboApiContext;
 import com.atommiddleware.cloud.core.security.XssSecurity;
 import com.atommiddleware.cloud.core.security.XssSecurity.XssFilterStrategy;
@@ -150,9 +151,9 @@ public abstract class AbstractBaseApiWrapper implements BaseApiWrapper, Initiali
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		xssFilterEnable = dubboReferenceConfigProperties.getSecurity().getXss().isEnable();
-		xssFilterStrategy = XssFilterStrategy.values()[dubboReferenceConfigProperties.getSecurity().getXss()
-				.getFilterStrategy()];
+		XssConfig xssConfig=dubboReferenceConfigProperties.getSecurity().getXss();
+		xssFilterEnable = xssConfig.isEnable();
+		xssFilterStrategy = XssFilterStrategy.values()[xssConfig.getFilterStrategy()];
 
 	}
 }

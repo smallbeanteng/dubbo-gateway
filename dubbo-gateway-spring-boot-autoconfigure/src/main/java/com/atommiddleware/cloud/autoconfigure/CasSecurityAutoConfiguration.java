@@ -1,5 +1,6 @@
 package com.atommiddleware.cloud.autoconfigure;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,14 +23,23 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.cas.ServiceProperties;
 import org.springframework.security.cas.authentication.CasAuthenticationProvider;
-import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
 import org.springframework.security.cas.web.CasAuthenticationFilter;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.expression.WebExpressionVoter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRepository;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.atommiddleware.cloud.core.cas.CasAjaxAuthenticationEntryPoint;
 import com.atommiddleware.cloud.core.config.DubboReferenceConfigProperties;
+import com.atommiddleware.cloud.core.config.DubboReferenceConfigProperties.CorsConfig;
+import com.atommiddleware.cloud.core.config.DubboReferenceConfigProperties.CsrfConfig;
 import com.atommiddleware.cloud.core.security.DefaultPrincipalObtain;
 import com.atommiddleware.cloud.core.serialize.Serialization;
 import com.atommiddleware.cloud.security.cas.BasedVoter;
@@ -46,8 +56,9 @@ public class CasSecurityAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	public AuthenticationEntryPoint authenticationEntryPoint(ServiceProperties serviceProperties,
-			DubboReferenceConfigProperties dubboReferenceConfigProperties) {
-		CasAuthenticationEntryPoint entryPoint = new CasAuthenticationEntryPoint();
+			DubboReferenceConfigProperties dubboReferenceConfigProperties, Serialization serialization) {
+		CasAjaxAuthenticationEntryPoint entryPoint = new CasAjaxAuthenticationEntryPoint(dubboReferenceConfigProperties,
+				serialization);
 		entryPoint.setLoginUrl(dubboReferenceConfigProperties.getSecurity().getCas().getServerUrl() + "/login");
 		entryPoint.setServiceProperties(serviceProperties);
 		return entryPoint;
@@ -149,5 +160,50 @@ public class CasSecurityAutoConfiguration {
 			DubboReferenceConfigProperties dubboReferenceConfigProperties) {
 		return new DefaultPrincipalObtain(serialization,
 				dubboReferenceConfigProperties.getSecurity().getCas().getPrincipalAttrs());
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	@ConditionalOnProperty(prefix = "com.atommiddleware.cloud.config.security.csrf", name = "enable", havingValue = "true")
+	public CsrfTokenRepository csrfTokenRepository(DubboReferenceConfigProperties dubboReferenceConfigProperties) {
+		CsrfConfig csrfConfig = dubboReferenceConfigProperties.getSecurity().getCsrf();
+		CookieCsrfTokenRepository cookieCsrfTokenRepository = new CookieCsrfTokenRepository();
+		cookieCsrfTokenRepository.setCookieHttpOnly(csrfConfig.isHttpOnly());
+		if (!StringUtils.isEmpty(csrfConfig.getDomain())) {
+			cookieCsrfTokenRepository.setCookieDomain(csrfConfig.getDomain());
+		}
+		if (!StringUtils.isEmpty(csrfConfig.getName())) {
+			cookieCsrfTokenRepository.setCookieName(csrfConfig.getName());
+		}
+		if (!StringUtils.isEmpty(csrfConfig.getPath())) {
+			cookieCsrfTokenRepository.setCookiePath(csrfConfig.getPath());
+		}
+		return cookieCsrfTokenRepository;
+	}
+
+	@Bean
+	@ConditionalOnProperty(prefix = "com.atommiddleware.cloud.config.security.cors", name = "enable", havingValue = "true")
+	public CorsConfigurationSource corsConfigurationSource(
+			DubboReferenceConfigProperties dubboReferenceConfigProperties) {
+		CorsConfig cors=dubboReferenceConfigProperties.getSecurity().getCors();
+		CorsConfiguration configuration = new CorsConfiguration();
+		configuration.setAllowCredentials(true);
+		if (!CollectionUtils.isEmpty(cors.getAllowedHeaders())) {
+			configuration.setAllowedHeaders(cors.getAllowedHeaders());
+		}
+		if (!CollectionUtils.isEmpty(cors.getAllowedOrigins())) {
+			configuration.setAllowedOrigins(cors.getAllowedOrigins());
+		}
+		if (!CollectionUtils.isEmpty(cors.getAllowedMethods())) {
+			configuration.setAllowedMethods(cors.getAllowedMethods());
+		}
+		if (cors.getMaxAge() > 0) {
+			configuration
+					.setMaxAge(Duration.ofSeconds(cors.getMaxAge()));
+		}
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration(cors.getPath(),
+				configuration);
+		return source;
 	}
 }

@@ -20,7 +20,10 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.csrf.CsrfTokenRepository;
+
 import com.atommiddleware.cloud.core.config.DubboReferenceConfigProperties;
+import com.atommiddleware.cloud.core.config.DubboReferenceConfigProperties.CasConfig;
 import com.google.common.collect.Lists;
 
 @Configuration(proxyBeanMethods = false)
@@ -43,7 +46,8 @@ public class CasSecurityWebSecurityConfigurerAdapterAutoConfiguration extends We
 	private DubboReferenceConfigProperties dubboReferenceConfigProperties;
 	@Autowired
 	private AccessDecisionManager accessDecisionManager;
-	
+	@Autowired(required = false)
+	private CsrfTokenRepository csrfTokenRepository;
 	@Override
 	public void configure(WebSecurity web) throws Exception {
 		List<String> ignoringUrls=Lists.newArrayList("/login/cas","/favicon.ico","/error");
@@ -60,23 +64,32 @@ public class CasSecurityWebSecurityConfigurerAdapterAutoConfiguration extends We
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.cors();
+		CasConfig casConfig=dubboReferenceConfigProperties.getSecurity().getCas();
+		if(dubboReferenceConfigProperties.getSecurity().getCors().isEnable()) {
+			http.cors();
+		}else {
+			http.cors().disable();
+		}
 		List<String> anonymousUrls=Lists.newArrayList("/login/cas","/favicon.ico","/error");
-		if(!ArrayUtils.isEmpty(dubboReferenceConfigProperties.getSecurity().getCas().getAnonymousUrls())) {
-			for(String anonymousUrl:dubboReferenceConfigProperties.getSecurity().getCas().getAnonymousUrls()) {
+		if(!ArrayUtils.isEmpty(casConfig.getAnonymousUrls())) {
+			for(String anonymousUrl:casConfig.getAnonymousUrls()) {
 				if(!anonymousUrls.contains(anonymousUrl)) {
 					anonymousUrls.add(anonymousUrl);
 				}
 			}
 		}
 		http.authorizeRequests().antMatchers(anonymousUrls.toArray(new String[anonymousUrls.size()])).anonymous();
-		if(!ArrayUtils.isEmpty(dubboReferenceConfigProperties.getSecurity().getCas().getPermitUrls())) {
-			http.authorizeRequests().antMatchers(dubboReferenceConfigProperties.getSecurity().getCas().getPermitUrls()).permitAll();
+		if(!ArrayUtils.isEmpty(casConfig.getPermitUrls())) {
+			http.authorizeRequests().antMatchers(casConfig.getPermitUrls()).permitAll();
 		}
 		if (!dubboReferenceConfigProperties.getSecurity().getCsrf().isEnable()) {
 			http.csrf().disable();
 		}
-
+		else {
+			if(null!=csrfTokenRepository) {
+				http.csrf().csrfTokenRepository(csrfTokenRepository);
+			}
+		}
 		http.authorizeRequests().anyRequest().authenticated().accessDecisionManager(accessDecisionManager).and().exceptionHandling().authenticationEntryPoint(authenticationEntryPoint).and()
 				.addFilterBefore(casAuthenticationFilter, FilterSecurityInterceptor.class).addFilterBefore(singleSignOutFilter, CasAuthenticationFilter.class)
 				.addFilterBefore(logoutFilter, LogoutFilter.class);

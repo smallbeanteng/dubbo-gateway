@@ -312,14 +312,14 @@ https://github.com/smallbeanteng/dubbo-gateway
       	<dependency>
 			<groupId>com.atommiddleware</groupId>
 			<artifactId>dubbo-gateway-api</artifactId>
-			<version>1.1.3-GA</version>
+			<version>1.1.4.6-Beta</version>
 		</dependency>
 第二步：网关引入改造后的jar包，同时引用以下jar包
 
 	`	<dependency>
 			<groupId>com.atommiddleware</groupId>
 			<artifactId>dubbo-gateway-spring-boot-starter</artifactId>
-			<version>1.1.3-GA</version>
+			<version>1.1.4.6-Beta</version>
 		</dependency>`
 第三步：在启动类上添加要扫描的api包名@DubboGatewayScanner(basePackages = "需扫描的api包名")
 
@@ -436,6 +436,14 @@ cas 认证登录 1.1.3-beta+ spring mvc 与zuul 集成了spring security cas认�
                  antisamyFileLocationPattern:
               csrf:
                  enable: false
+	             domain: atommiddleware.com
+	             path: /
+	          cors:
+	             enable: true
+	             allowedOrigins: https://admin.atommiddleware.com:9628
+	             allowedHeaders: X-Requested-With,content-type,X-XSRF-TOKEN
+	             allowedMethods: GET,POST
+	             maxAge: 3600 
             session:
               cookie:
                  enable: true
@@ -503,6 +511,10 @@ cas 认证登录 1.1.3-beta+ spring mvc 与zuul 集成了spring security cas认�
   参数配置说明
 ![图片丢失了...](http://www.atommiddleware.com/csrf.png)
 
+## cors ##
+  参数配置说明
+![图片丢失了...](http://www.atommiddleware.com/cors.png)
+
 ## session共享 ##
 
 开启步骤:
@@ -565,7 +577,7 @@ spring cloud zuul类型接口:com.atommiddleware.cloud.core.annotation.ResponseZ
 ## 其它说明 ##
 基于webflux的网关与基于servlet类的web应用接入整合方式是一样的步骤，例子使用的nacos版本2.0.3，默认支持GET,POST方式接入，ContentType支持application/json，application/x-www-form-urlencoded，复杂参数【类的属性为非基本数据类型】建议使用application/json,或项目整体都使用application/json
 ## 版本说明 ##
-推荐试用1.1.3-GA
+推荐试用1.1.4.6-Beta
 
 
 

@@ -15,12 +15,16 @@ import org.springframework.util.StringUtils;
 
 public class HttpUtils {
 
+	private static final String AJAX_HEADER_VALUE = "XMLHttpRequest";
+	private static final String AJAX_HEADER_NAME = "X-Requested-With";
+	private static final String IS_AJAX_REQUEST = "is_ajax_request";
+
 	/**
 	 * 将URL请求参数转换成Map
 	 * 
 	 * @param request
 	 */
-	public static Map<String, String> getUrlParams(HttpServletRequest request,String charset) {
+	public static Map<String, String> getUrlParams(HttpServletRequest request, String charset) {
 		Map<String, String> result = new HashMap<>(16);
 		String param = "";
 		try {
@@ -39,7 +43,7 @@ public class HttpUtils {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * 获取 Body 参数
 	 * 
@@ -48,11 +52,11 @@ public class HttpUtils {
 	public static String getBodyParam(final HttpServletRequest request) throws IOException {
 		return inputConvertToString(request.getInputStream());
 	}
-	
+
 	public static InputStream getBodyInputStream(final HttpServletRequest request) throws IOException {
 		return request.getInputStream();
 	}
-	
+
 	public static String inputConvertToString(InputStream input) throws IOException {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 		String str = "";
@@ -63,5 +67,13 @@ public class HttpUtils {
 		}
 		return wholeStr.toString();
 	}
-	
+
+	public static boolean isAjax(HttpServletRequest httpRequest) {
+		final boolean xmlHttpRequest = AJAX_HEADER_VALUE.equalsIgnoreCase(httpRequest.getHeader(AJAX_HEADER_NAME));
+		final boolean hasDynamicAjaxParameter = Boolean.TRUE.toString()
+				.equalsIgnoreCase(httpRequest.getHeader(IS_AJAX_REQUEST));
+		final boolean hasDynamicAjaxHeader = Boolean.TRUE.toString()
+				.equalsIgnoreCase(httpRequest.getParameter(IS_AJAX_REQUEST));
+		return xmlHttpRequest || hasDynamicAjaxParameter || hasDynamicAjaxHeader;
+	}
 }
