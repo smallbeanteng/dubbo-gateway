@@ -164,7 +164,7 @@ public class CasSecurityAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	@ConditionalOnProperty(prefix = "com.atommiddleware.cloud.config.security.csrf", name = "enable", havingValue = "true")
+	@ConditionalOnProperty(prefix = "com.atommiddleware.cloud.config.security.csrf", name = "enable", havingValue = "true",matchIfMissing = true)
 	public CsrfTokenRepository csrfTokenRepository(DubboReferenceConfigProperties dubboReferenceConfigProperties) {
 		CsrfConfig csrfConfig = dubboReferenceConfigProperties.getSecurity().getCsrf();
 		CookieCsrfTokenRepository cookieCsrfTokenRepository = new CookieCsrfTokenRepository();
@@ -182,7 +182,7 @@ public class CasSecurityAutoConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnProperty(prefix = "com.atommiddleware.cloud.config.security.cors", name = "enable", havingValue = "true")
+	@ConditionalOnProperty(prefix = "com.atommiddleware.cloud.config.security.cors", name = "enable", havingValue = "true",matchIfMissing = true)
 	public CorsConfigurationSource corsConfigurationSource(
 			DubboReferenceConfigProperties dubboReferenceConfigProperties) {
 		CorsConfig cors=dubboReferenceConfigProperties.getSecurity().getCors();

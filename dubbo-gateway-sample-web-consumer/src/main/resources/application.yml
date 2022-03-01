@@ -2,10 +2,11 @@ com:
   atommiddleware:
     cloud:
       config:
+        excludUrlPatterns: /cas/redirect
         security:
           cas:
              enable: true
-             baseUrl: https://cas.atommiddleware.com:8862/cas/redirect?service=https://cas.atommiddleware.com:8862/sample/registerUserFromPathMap/admin/11/1
+             baseUrl: https://cas.atommiddleware.com:8865/cas/redirect?service=https://cas.atommiddleware.com:8865/sample/registerUserFromPathMap/admin/11/1
              serverUrl: https://cas.atommiddleware.com:8443/cas
              principalAttrs: username,enable
              ignoringUrls:

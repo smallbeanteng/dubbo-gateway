@@ -14,6 +14,7 @@ import com.atommiddleware.cloud.core.annotation.DubboGatewayScanner;
 public class App {
 	public static void main(String[] args) {
 		//SendResponseFilter
+		//ZuulProperties
 		SpringApplication.run(App.class, args);
 	}
 }

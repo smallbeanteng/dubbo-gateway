@@ -1,5 +1,6 @@
 package com.atommiddleware.cloud.autoconfigure;
 
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -22,7 +23,7 @@ import com.atommiddleware.cloud.core.serialize.Serialization;
 @ConditionalOnProperty(prefix = "com.atommiddleware.cloud.config", name = "enable", havingValue = "true", matchIfMissing = true)
 @AutoConfigureAfter(DubboGatewayCommonAutoConfiguration.class)
 @ConditionalOnWebApplication(type = Type.REACTIVE)
-@ConditionalOnClass(GlobalFilter.class)
+@ConditionalOnClass({ GlobalFilter.class, DubboReference.class })
 public class DubboGatewayAutoConfiguration {
 
 	@Bean

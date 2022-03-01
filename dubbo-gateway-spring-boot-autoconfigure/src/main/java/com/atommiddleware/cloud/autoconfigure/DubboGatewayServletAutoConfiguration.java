@@ -1,6 +1,8 @@
 package com.atommiddleware.cloud.autoconfigure;
 
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -26,6 +28,7 @@ import com.atommiddleware.cloud.security.validation.ParamValidator;
 @ConditionalOnWebApplication(type = Type.SERVLET)
 @ConditionalOnMissingClass(value = { "com.netflix.zuul.http.ZuulServlet", "com.netflix.zuul.http.ZuulServletFilter" })
 @AutoConfigureAfter(DubboGatewayCommonAutoConfiguration.class)
+@ConditionalOnClass({DubboReference.class})
 @Import(SevlertImportBeanDefinitionRegistrar.class)
 public class DubboGatewayServletAutoConfiguration {
 
