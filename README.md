@@ -583,6 +583,7 @@ spring cloud zuul类型接口:com.atommiddleware.cloud.core.annotation.ResponseZ
 - spring cloud gateway 的安全实现【最好对接cas server】
 - api jar包的热部署实现
 - 实现根据元数据中心dubbo泛化调用
+- multimap转bean高性能实现【解决复杂表单转复杂bean的场景(ContentType为application/x-www-form-urlencoded时的复杂表单)】 
 
 ## 招募 ##
 欢迎对微服务相关技术有研究并且热爱技术的兄弟加入此项目的开源队伍.
