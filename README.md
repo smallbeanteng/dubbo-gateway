@@ -579,7 +579,18 @@ spring cloud zuul类型接口:com.atommiddleware.cloud.core.annotation.ResponseZ
 基于webflux的网关与基于servlet类的web应用接入整合方式是一样的步骤，例子使用的nacos版本2.0.3，默认支持GET,POST方式接入，ContentType支持application/json，application/x-www-form-urlencoded，复杂参数【类的属性为非基本数据类型】建议使用application/json,或项目整体都使用application/json
 ## 版本说明 ##
 推荐试用1.1.4.6-GA
+## feature ##
+- spring cloud gateway 的安全实现【最好对接cas server】
+- api jar包的热部署实现
+- 实现根据元数据中心dubbo泛化调用
 
+## 招募 ##
+欢迎对微服务相关技术有研究并且热爱技术的兄弟加入此项目的开源队伍.
 
+![图片不见了...](http://www.atommiddleware.com/author12.jpg)
 
+## 打赏 ##
+您的支持是一种动力.哈哈
+
+![图片消失了...](http://www.atommiddleware.com/authorpay1.jpg)
     
